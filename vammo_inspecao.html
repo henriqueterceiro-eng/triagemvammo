@@ -228,6 +228,7 @@ input.placa-input{
   overflow-x:hidden;
   display:flex;
   flex-direction:column;
+  touch-action:pan-y;
 }
 
 /* ─── MOTO CONTAINER ─── */
@@ -940,20 +941,38 @@ function renderVista(vistaId) {
       ${renderDanosLista(vistaId)}
     </div>`;
 
-  // Posiciona os hotspots após imagem carregar
+  // Posiciona os hotspots após imagem carregar e layout ser calculado
   const img = $(`moto-img-${vistaId}`);
+  const fazerPosicionar = () => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => posicionarHotspots(vistaId));
+    });
+  };
   if (img.complete && img.naturalWidth > 0) {
-    posicionarHotspots(vistaId);
+    fazerPosicionar();
   } else {
-    img.addEventListener('load', () => posicionarHotspots(vistaId));
+    img.addEventListener('load', fazerPosicionar);
   }
 
   // Reposiciona se tela girar ou redimensionar
-  window.addEventListener('resize', () => posicionarHotspots(vistaId), { once: true });
+  window.addEventListener('resize', fazerPosicionar);
+  window.addEventListener('orientationchange', fazerPosicionar);
 
   // Eventos dos hotspots
   body.querySelectorAll('.hotspot').forEach(el => {
-    el.addEventListener('pointerdown', (e) => {
+    let tocou = false;
+    el.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      tocou = true;
+      const hId = el.dataset.hotspot;
+      const vId = el.dataset.vista;
+      const h = HOTSPOTS[vId].find(x => x.id === hId);
+      abrirSheet(vId, hId, h.nome);
+      setTimeout(() => { tocou = false; }, 600);
+    }, { passive: false });
+    el.addEventListener('click', (e) => {
+      if (tocou) return;
       e.stopPropagation();
       const hId = el.dataset.hotspot;
       const vId = el.dataset.vista;
