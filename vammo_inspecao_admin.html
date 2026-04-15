@@ -386,6 +386,36 @@ body{
   margin-top:-8px;
 }
 .modal-sm-actions{display:flex;gap:8px}
+.img-upload-bar{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 16px;
+  background:var(--surface2);
+  border-bottom:1px solid var(--border-dim);
+  flex-shrink:0;
+}
+.img-upload-bar label{
+  font-family:'Rajdhani',sans-serif;
+  font-size:11px;font-weight:600;
+  letter-spacing:2px;text-transform:uppercase;
+  color:var(--text-dim);white-space:nowrap;
+}
+.btn-upload{
+  background:none;
+  border:1px dashed var(--border);
+  border-radius:var(--r-sm);
+  color:var(--blue);
+  font-family:'Rajdhani',sans-serif;
+  font-size:12px;font-weight:600;
+  letter-spacing:1px;
+  padding:7px 14px;cursor:pointer;
+  transition:all .15s;white-space:nowrap;
+}
+.btn-upload:hover{background:var(--blue-dim)}
+.img-status{
+  font-family:'Rajdhani',sans-serif;
+  font-size:11px;color:var(--green);
+  letter-spacing:1px;
+}
 .btn-cancel-sm{
   flex:1;background:none;
   border:1px solid var(--border-dim);
@@ -426,6 +456,14 @@ body{
 
 <!-- TABS -->
 <div class="tabs" id="tabs"></div>
+
+<!-- UPLOAD BAR -->
+<div class="img-upload-bar">
+  <label>Imagem da vista:</label>
+  <button class="btn-upload" id="btn-upload-img">📁 Carregar imagem</button>
+  <input type="file" id="input-img-file" accept="image/*" style="display:none">
+  <span class="img-status" id="img-status"></span>
+</div>
 
 <!-- MAIN -->
 <div class="main">
@@ -539,7 +577,7 @@ function buildTabs() {
 // ─── IMAGEM ───
 function renderImagem() {
   const v = VISTAS.find(x => x.id === vistaAtual);
-  $('moto-img').src = v.img;
+  $('moto-img').src = imgCache[vistaAtual] || v.img;
   $('panel-title').textContent = `Pontos — ${v.label}`;
 }
 
@@ -854,10 +892,10 @@ $('btn-download-html').addEventListener('click', async () => {
     const novoHotspots = gerarCodigo();
 
     // Substitui o bloco HOTSPOTS no HTML
-    const regex = /const HOTSPOTS\s*=\s*\{[\s\S]*?
-\};/;
-    if (!regex.test(html)) throw new Error('Bloco HOTSPOTS não encontrado no HTML');
-    html = html.replace(regex, novoHotspots);
+    const idx1 = html.indexOf('const HOTSPOTS');
+    const idx2 = html.indexOf('};', idx1) + 2;
+    if (idx1 === -1) throw new Error('Bloco HOTSPOTS não encontrado no HTML');
+    html = html.slice(0, idx1) + novoHotspots + html.slice(idx2);
 
     // Download
     const blob = new Blob([html], { type: 'text/html' });
@@ -875,6 +913,27 @@ $('btn-download-html').addEventListener('click', async () => {
     btn.textContent = '↓ Baixar HTML atualizado';
     btn.disabled = false;
   }
+});
+
+// ─── UPLOAD DE IMAGEM ───
+const imgCache = {}; // { vistaId: dataURL }
+
+$('btn-upload-img').addEventListener('click', () => {
+  $('input-img-file').click();
+});
+
+$('input-img-file').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    imgCache[vistaAtual] = ev.target.result;
+    renderImagem();
+    $('img-status').textContent = '✓ ' + file.name;
+    setTimeout(() => { $('img-status').textContent = ''; }, 3000);
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
 });
 
 // ─── BOOT ───
