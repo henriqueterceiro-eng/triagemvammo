@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Vammo — Inspeção</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Barlow:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+/* ─── RESET & BASE ─── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#2EC2FF;
+  --blue-dim:rgba(46,194,255,.15);
+  --blue-glow:rgba(46,194,255,.35);
+  --bg:#080c10;
+  --surface:#0e1318;
+  --surface2:#141b22;
+  --surface3:#1c2630;
+  --border:rgba(46,194,255,.18);
+  --border-dim:rgba(255,255,255,.07);
+  --text:#e8f0f5;
+  --text-dim:#6b8090;
+  --text-muted:#3a4d5a;
+  --red:#ff4d6a;
+  --orange:#ff8c42;
+  --yellow:#ffd166;
+  --green:#06d6a0;
+  --r:10px;
+  --r-sm:6px;
+}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:'Barlow',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  display:flex;
+  flex-direction:column;
+  height:100dvh;
+  overflow:hidden;
+}
+
+/* ─── SCREENS ─── */
+.screen{display:none;flex-direction:column;height:100%;overflow:hidden}
+.screen.active{display:flex}
+
+/* ─── TELA HOME ─── */
+#screen-home{
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%, rgba(46,194,255,.08) 0%, transparent 70%), var(--bg);
+}
+.home-inner{width:100%;max-width:380px;display:flex;flex-direction:column;gap:28px}
+.vammo-brand{display:flex;flex-direction:column;align-items:center;gap:6px}
+.vammo-wordmark{
+  font-family:'Rajdhani',sans-serif;
+  font-size:38px;
+  font-weight:700;
+  letter-spacing:6px;
+  color:var(--blue);
+  line-height:1;
+}
+.vammo-sub{
+  font-family:'Rajdhani',sans-serif;
+  font-size:11px;
+  letter-spacing:4px;
+  color:var(--text-dim);
+  text-transform:uppercase;
+}
+.form-block{display:flex;flex-direction:column;gap:16px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{
+  font-family:'Rajdhani',sans-serif;
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:3px;
+  color:var(--text-dim);
+  text-transform:uppercase;
+}
+.field select,.field input{
+  background:var(--surface);
+  border:1px solid var(--border-dim);
+  border-radius:var(--r-sm);
+  color:var(--text);
+  font-family:'Rajdhani',sans-serif;
+  font-size:17px;
+  font-weight:500;
+  padding:14px 16px;
+  outline:none;
+  transition:border-color .2s;
+  width:100%;
+  -webkit-appearance:none;
+}
+.field select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b8090' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 16px center;
+  padding-right:40px;
+}
+.field input:focus,.field select:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim)}
+.field input::placeholder{color:var(--text-muted)}
+input.placa-input{
+  text-transform:uppercase;
+  letter-spacing:4px;
+  font-size:22px;
+  text-align:center;
+}
+.btn-primary{
+  background:var(--blue);
+  color:#000;
+  border:none;
+  border-radius:var(--r-sm);
+  font-family:'Rajdhani',sans-serif;
+  font-size:15px;
+  font-weight:700;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  padding:16px;
+  cursor:pointer;
+  transition:opacity .15s,transform .1s;
+  width:100%;
+}
+.btn-primary:active{opacity:.85;transform:scale(.98)}
+.btn-primary:disabled{opacity:.35;cursor:not-allowed}
+
+/* ─── HEADER ─── */
+.app-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px 16px;
+  background:var(--surface);
+  border-bottom:1px solid var(--border-dim);
+  flex-shrink:0;
+  gap:12px;
+}
+.header-placa{
+  font-family:'Rajdhani',sans-serif;
+  font-size:18px;
+  font-weight:700;
+  letter-spacing:3px;
+  color:var(--blue);
+  white-space:nowrap;
+}
+.header-inspetor{
+  font-family:'Rajdhani',sans-serif;
+  font-size:12px;
+  color:var(--text-dim);
+  letter-spacing:1px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.header-meta{display:flex;flex-direction:column;gap:1px;flex:1;min-width:0}
+.btn-icon{
+  background:none;
+  border:1px solid var(--border-dim);
+  border-radius:var(--r-sm);
+  color:var(--text-dim);
+  cursor:pointer;
+  padding:8px 10px;
+  font-family:'Rajdhani',sans-serif;
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:1px;
+  white-space:nowrap;
+  transition:all .15s;
+}
+.btn-icon:active{border-color:var(--blue);color:var(--blue)}
+
+/* ─── TABS ─── */
+.tabs{
+  display:flex;
+  background:var(--surface);
+  border-bottom:1px solid var(--border-dim);
+  flex-shrink:0;
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+.tabs::-webkit-scrollbar{display:none}
+.tab{
+  flex:1;
+  min-width:70px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+  padding:10px 6px 8px;
+  cursor:pointer;
+  border-bottom:2px solid transparent;
+  transition:all .15s;
+  position:relative;
+}
+.tab.active{border-bottom-color:var(--blue)}
+.tab-label{
+  font-family:'Rajdhani',sans-serif;
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  color:var(--text-dim);
+  transition:color .15s;
+}
+.tab.active .tab-label{color:var(--blue)}
+.tab-badge{
+  display:none;
+  background:var(--red);
+  color:#fff;
+  font-family:'Rajdhani',sans-serif;
+  font-size:10px;
+  font-weight:700;
+  min-width:16px;
+  height:16px;
+  border-radius:8px;
+  padding:0 4px;
+  align-items:center;
+  justify-content:center;
+  position:absolute;
+  top:6px;
+  right:8px;
+}
+.tab-badge.has-items{display:flex}
+
+/* ─── INSPEÇÃO BODY ─── */
+.insp-body{
+  flex:1;
+  overflow-y:auto;
+  overflow-x:hidden;
+  display:flex;
+  flex-direction:column;
+}
+
+/* ─── MOTO CONTAINER ─── */
+.moto-wrap{
+  position:relative;
+  width:100%;
+  background:var(--surface);
+  flex-shrink:0;
+  overflow:hidden;
+  border-bottom:1px solid var(--border-dim);
+}
+.moto-img{
+  width:100%;
+  height:auto;
+  display:block;
+  max-height:56vw;
+  object-fit:contain;
+  object-position:center;
+  background:#f9f9f9;
+  filter:contrast(1.05);
+}
+/* Ajuste para vistas quadradas (frente/traseira) */
+.moto-img.square{max-height:80vw}
+
+/* ─── HOTSPOT ─── */
+.hotspot{
+  position:absolute;
+  transform:translate(-50%,-50%);
+  cursor:pointer;
+  z-index:10;
+}
+.hotspot-dot{
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  border:2.5px solid var(--blue);
+  background:rgba(46,194,255,.15);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all .15s;
+  position:relative;
+}
+.hotspot-dot::before{
+  content:'';
+  position:absolute;
+  inset:-4px;
+  border-radius:50%;
+  border:1.5px solid rgba(46,194,255,.3);
+  animation:pulse 2s ease-in-out infinite;
+}
+.hotspot.dano .hotspot-dot{
+  border-color:var(--red);
+  background:rgba(255,77,106,.2);
+}
+.hotspot.dano .hotspot-dot::before{border-color:rgba(255,77,106,.3)}
+.hotspot-inner{
+  width:6px;height:6px;
+  border-radius:50%;
+  background:var(--blue);
+}
+.hotspot.dano .hotspot-inner{background:var(--red)}
+@keyframes pulse{
+  0%,100%{opacity:.6;transform:scale(1)}
+  50%{opacity:0;transform:scale(1.6)}
+}
+.hotspot:active .hotspot-dot{background:var(--blue-glow);transform:scale(1.2)}
+
+/* ─── LISTA DANOS ─── */
+.danos-section{
+  padding:12px 16px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.danos-title{
+  font-family:'Rajdhani',sans-serif;
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:3px;
+  color:var(--text-muted);
+  text-transform:uppercase;
+  padding-bottom:4px;
+}
+.dano-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:var(--surface);
+  border:1px solid var(--border-dim);
+  border-radius:var(--r-sm);
+  padding:10px 12px;
+  animation:slideIn .2s ease;
+}
+@keyframes slideIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.dano-tipo-tag{
+  font-family:'Rajdhani',sans-serif;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:1px;
+  padding:3px 8px;
+  border-radius:4px;
+  white-space:nowrap;
+  flex-shrink:0;
+}
+.dano-tipo-tag.riscado{background:rgba(255,209,102,.15);color:var(--yellow)}
+.dano-tipo-tag.quebrado{background:rgba(255,77,106,.15);color:var(--red)}
+.dano-tipo-tag.solto{background:rgba(255,140,66,.15);color:var(--orange)}
+.dano-tipo-tag.padrao{background:rgba(107,128,144,.15);color:var(--text-dim)}
+.dano-peca{
+  font-family:'Rajdhani',sans-serif;
+  font-size:14px;
+  font-weight:500;
+  color:var(--text);
+  flex:1;
+  min-width:0;
+}
+.dano-obs{
+  font-size:12px;
+  color:var(--text-dim);
+  margin-top:1px;
+  font-style:italic;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.dano-del{
+  background:none;
+  border:none;
+  color:var(--text-muted);
+  cursor:pointer;
+  font-size:18px;
+  line-height:1;
+  padding:2px 4px;
+  transition:color .15s;
+  flex-shrink:0;
+}
+.dano-del:active{color:var(--red)}
+.empty-vista{
+  padding:20px 16px;
+  text-align:center;
+  color:var(--text-muted);
+  font-family:'Rajdhani',sans-serif;
+  font-size:13px;
+  letter-spacing:1px;
+}
+
+/* ─── FOOTER INSPEÇÃO ─── */
+.insp-footer{
+  padding:12px 16px;
+  border-top:1px solid var(--border-dim);
+  background:var(--surface);
+  flex-shrink:0;
+}
+.btn-finalizar{
+  background:var(--blue);
+  color:#000;
+  border:none;
+  border-radius:var(--r-sm);
+  font-family:'Rajdhani',sans-serif;
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  padding:14px;
+  cursor:pointer;
+  width:100%;
+  transition:opacity .15s;
+}
+.btn-finalizar:disabled{opacity:.35;cursor:not-allowed}
+
+/* ─── POPUP AVARIA (BOTTOM SHEET) ─── */
+.overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.65);
+  z-index:100;
+  backdrop-filter:blur(3px);
+}
+.overlay.open{display:flex;align-items:flex-end}
+.sheet{
+  background:var(--surface2);
+  border-top:1px solid var(--border);
+  border-radius:20px 20px 0 0;
+  width:100%;
+  padding:0 0 env(safe-area-inset-bottom,0);
+  animation:slideUp .25s cubic-bezier(.32,1.2,.36,1);
+  max-height:90dvh;
+  overflow-y:auto;
+}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:none}}
+.sheet-handle{
+  width:36px;height:4px;
+  background:var(--border-dim);
+  border-radius:2px;
+  margin:12px auto 0;
+}
+.sheet-header{
+  padding:16px 20px 12px;
+  border-bottom:1px solid var(--border-dim);
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+.sheet-peca{
+  font-family:'Rajdhani',sans-serif;
+  font-size:20px;
+  font-weight:700;
+  color:var(--text);
+  line-height:1.2;
+  flex:1;
+}
+.sheet-vista{
+  font-family:'Rajdhani',sans-serif;
+  font-size:11px;
+  letter-spacing:2px;
+  color:var(--text-dim);
+  margin-top:2px;
+  text-transform:uppercase;
+}
+.btn-close-sheet{
+  background:none;
+  border:none;
+  color:var(--text-dim);
+  font-size:22px;
+  cursor:pointer;
+  padding:2px;
+  line-height:1;
+  flex-shrink:0;
+}
+.sheet-body{padding:16px 20px;display:flex;flex-direction:column;gap:16px}
+.tipo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tipo-btn{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:4px;
+  padding:14px 14px;
+  border:1.5px solid var(--border-dim);
+  border-radius:var(--r-sm);
+  background:var(--surface);
+  cursor:pointer;
+  transition:all .15s;
+}
+.tipo-btn.selected{border-color:var(--blue);background:var(--blue-dim)}
+.tipo-btn-icon{font-size:18px}
+.tipo-btn-label{
+  font-family:'Rajdhani',sans-serif;
+  font-size:14px;
+  font-weight:600;
+  color:var(--text-dim);
+  letter-spacing:.5px;
+  transition:color .15s;
+}
+.tipo-btn.selected .tipo-btn-label{color:var(--text)}
+.obs-field textarea{
+  background:var(--surface);
+  border:1px solid var(--border-dim);
+  border-radius:var(--r-sm);
+  color:var(--text);
+  font-family:'Barlow',sans-serif;
+  font-size:14px;
+  padding:12px 14px;
+  width:100%;
+  resize:none;
+  height:72px;
+  outline:none;
+  transition:border-color .2s;
+}
+.obs-field textarea:focus{border-color:var(--blue)}
+.obs-field textarea::placeholder{color:var(--text-muted)}
+.obs-field label{
+  font-family:'Rajdhani',sans-serif;
+  font-size:11px;
+  letter-spacing:2px;
+  color:var(--text-dim);
+  text-transform:uppercase;
+  margin-bottom:6px;
+  display:block;
+}
+.sheet-footer{
+  padding:8px 20px 16px;
+  display:flex;
+  gap:10px;
+}
+.btn-cancel{
+  flex:1;
+  background:none;
+  border:1px solid var(--border-dim);
+  border-radius:var(--r-sm);
+  color:var(--text-dim);
+  font-family:'Rajdhani',sans-serif;
+  font-size:14px;
+  font-weight:600;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  padding:13px;
+  cursor:pointer;
+}
+.btn-registrar{
+  flex:2;
+  background:var(--blue);
+  border:none;
+  border-radius:var(--r-sm);
+  color:#000;
+  font-family:'Rajdhani',sans-serif;
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  padding:13px;
+  cursor:pointer;
+  transition:opacity .15s;
+}
+.btn-registrar:disabled{opacity:.35;cursor:not-allowed}
+.btn-remover-dano{
+  width:100%;
+  background:none;
+  border:1px solid rgba(255,77,106,.3);
+  border-radius:var(--r-sm);
+  color:var(--red);
+  font-family:'Rajdhani',sans-serif;
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  padding:10px;
+  cursor:pointer;
+  margin-top:-4px;
+}
+
+/* ─── TELA RESUMO ─── */
+#screen-resumo{overflow-y:auto}
+.resumo-header{
+  padding:20px 16px 12px;
+  border-bottom:1px solid var(--border-dim);
+  background:var(--surface);
+}
+.resumo-title{
+  font-family:'Rajdhani',sans-serif;
+  font-size:22px;
+  font-weight:700;
+  color:var(--text);
+  letter-spacing:1px;
+}
+.resumo-meta{
+  font-family:'Rajdhani',sans-serif;
+  font-size:12px;
+  letter-spacing:2px;
+  color:var(--text-dim);
+  text-transform:uppercase;
+  margin-top:4px;
+}
+.resumo-body{padding:16px;display:flex;flex-direction:column;gap:16px}
+.resumo-section-title{
+  font-family:'Rajdhani',sans-serif;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:3px;
+  color:var(--text-dim);
+  text-transform:uppercase;
+  margin-bottom:8px;
+}
+.resumo-empty{
+  text-align:center;
+  padding:40px 16px;
+  color:var(--text-muted);
+  font-family:'Rajdhani',sans-serif;
+  font-size:15px;
+  letter-spacing:1px;
+}
+.resumo-ok{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:14px;
+  background:rgba(6,214,160,.08);
+  border:1px solid rgba(6,214,160,.2);
+  border-radius:var(--r-sm);
+  font-family:'Rajdhani',sans-serif;
+  font-size:14px;
+  color:var(--green);
+  letter-spacing:.5px;
+}
+.resumo-footer{
+  padding:12px 16px 24px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  border-top:1px solid var(--border-dim);
+  background:var(--surface);
+}
+.btn-enviar{
+  background:var(--blue);
+  color:#000;
+  border:none;
+  border-radius:var(--r-sm);
+  font-family:'Rajdhani',sans-serif;
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  padding:15px;
+  cursor:pointer;
+  width:100%;
+  transition:opacity .15s;
+}
+.btn-enviar:disabled{opacity:.35;cursor:not-allowed}
+.btn-nova{
+  background:none;
+  border:1px solid var(--border-dim);
+  border-radius:var(--r-sm);
+  color:var(--text-dim);
+  font-family:'Rajdhani',sans-serif;
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  padding:12px;
+  cursor:pointer;
+  width:100%;
+}
+.status-msg{
+  text-align:center;
+  font-family:'Rajdhani',sans-serif;
+  font-size:13px;
+  letter-spacing:1px;
+  padding:8px;
+  border-radius:var(--r-sm);
+  display:none;
+}
+.status-msg.sending{display:block;color:var(--text-dim);background:var(--surface2)}
+.status-msg.success{display:block;color:var(--green);background:rgba(6,214,160,.08);border:1px solid rgba(6,214,160,.2)}
+.status-msg.error{display:block;color:var(--red);background:rgba(255,77,106,.08);border:1px solid rgba(255,77,106,.2)}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     CONFIGURAÇÕES
+══════════════════════════════════════════ -->
+<script>
+const CONFIG = {
+  GAS_URL: 'https://script.google.com/macros/s/SEU_DEPLOYMENT_ID_AQUI/exec',
+  INSPETORES: ['CX VAMMO'],
+  IMAGENS: {
+    frente:    'moto_front_view.png',
+    traseira:  'moto_rear_view.png',
+    lat_esq:   'moto_v3_left.png',
+    lat_dir:   'moto_left_side_view_v2.png'
+  }
+};
+
+const VISTAS = [
+  { id: 'frente',   label: 'Frente',   img: CONFIG.IMAGENS.frente,   square: true  },
+  { id: 'traseira', label: 'Traseira', img: CONFIG.IMAGENS.traseira, square: true  },
+  { id: 'lat_esq',  label: 'Lat. Esq',img: CONFIG.IMAGENS.lat_esq,  square: false },
+  { id: 'lat_dir',  label: 'Lat. Dir', img: CONFIG.IMAGENS.lat_dir,  square: false }
+];
+
+// ─── HOTSPOTS (x%, y% sobre a imagem) ───
+// Ajuste as coordenadas conforme necessário após ver no app
+const HOTSPOTS = {
+  frente: [
+    { id: 'ret_esq',       nome: 'Retrovisor Esquerdo',   x: 11, y: 26 },
+    { id: 'ret_dir',       nome: 'Retrovisor Direito',    x: 87, y: 26 },
+    { id: 'painel',        nome: 'Painel / Instrumentos', x: 50, y: 33 },
+    { id: 'farol',         nome: 'Farol Dianteiro',       x: 50, y: 60 },
+    { id: 'caren_front',   nome: 'Carenagem Frontal',     x: 50, y: 45 },
+    { id: 'para_lama_f',   nome: 'Para-lama Dianteiro',   x: 50, y: 80 },
+    { id: 'roda_diant',    nome: 'Roda Dianteira',        x: 50, y: 92 },
+  ],
+  traseira: [
+    { id: 'bagageiro',     nome: 'Bagageiro',             x: 35, y: 8  },
+    { id: 'banco_tras',    nome: 'Banco / Garupa',        x: 50, y: 14 },
+    { id: 'lanterna_tras', nome: 'Lanterna Traseira',     x: 44, y: 36 },
+    { id: 'placa',         nome: 'Placa',                 x: 43, y: 53 },
+    { id: 'para_choque',   nome: 'Para-choque Traseiro',  x: 43, y: 45 },
+    { id: 'amort_tras',    nome: 'Amortecedor',           x: 68, y: 58 },
+    { id: 'roda_tras_t',   nome: 'Roda Traseira',         x: 45, y: 87 },
+  ],
+  lat_esq: [
+    { id: 'esp_esq',       nome: 'Espelho Retrovisor',    x: 54, y: 10 },
+    { id: 'display_esq',   nome: 'Painel / Display',      x: 64, y: 17 },
+    { id: 'caren_esq',     nome: 'Carenagem Lateral Esq.',x: 40, y: 50 },
+    { id: 'banco_esq',     nome: 'Banco',                 x: 36, y: 28 },
+    { id: 'bagag_esq',     nome: 'Bagageiro',             x: 18, y: 25 },
+    { id: 'p_lama_t_esq',  nome: 'Para-lama Traseiro',    x: 12, y: 43 },
+    { id: 'susp_esq',      nome: 'Suspensão / Amortecedor',x: 23, y: 56 },
+    { id: 'roda_t_esq',    nome: 'Roda Traseira',         x: 16, y: 73 },
+    { id: 'roda_d_esq',    nome: 'Roda Dianteira',        x: 80, y: 73 },
+    { id: 'p_lama_d_esq',  nome: 'Para-lama Dianteiro',   x: 76, y: 55 },
+  ],
+  lat_dir: [
+    { id: 'esp_dir',       nome: 'Espelho Retrovisor',    x: 37, y: 9  },
+    { id: 'caren_dir',     nome: 'Carenagem Lateral Dir.',x: 56, y: 46 },
+    { id: 'banco_dir',     nome: 'Banco',                 x: 50, y: 27 },
+    { id: 'bagag_dir',     nome: 'Bagageiro',             x: 72, y: 24 },
+    { id: 'lanterna_dir',  nome: 'Lanterna Traseira',     x: 77, y: 37 },
+    { id: 'amort_dir',     nome: 'Amortecedor Traseiro',  x: 74, y: 53 },
+    { id: 'roda_t_dir',    nome: 'Roda Traseira',         x: 79, y: 73 },
+    { id: 'roda_d_dir',    nome: 'Roda Dianteira',        x: 19, y: 73 },
+    { id: 'garfo_dir',     nome: 'Garfo Dianteiro',       x: 25, y: 55 },
+  ]
+};
+
+const TIPOS_DANO = [
+  { id: 'riscado',  label: 'Riscado',         icon: '〜', cls: 'riscado'  },
+  { id: 'quebrado', label: 'Quebrado',         icon: '✕',  cls: 'quebrado' },
+  { id: 'solto',    label: 'Solto / Faltando', icon: '◌',  cls: 'solto'   },
+  { id: 'padrao',   label: 'Fora de Padrão',   icon: '⚑',  cls: 'padrao'  },
+];
+</script>
+
+<!-- ══════════════════════════════════════════
+     TELA HOME
+══════════════════════════════════════════ -->
+<div id="screen-home" class="screen active">
+  <div class="home-inner">
+    <div class="vammo-brand">
+      <div class="vammo-wordmark">VAMMO</div>
+      <div class="vammo-sub">Inspeção de Veículos</div>
+    </div>
+    <div class="form-block">
+      <div class="field">
+        <label>Inspetor</label>
+        <select id="sel-inspetor"></select>
+      </div>
+      <div class="field">
+        <label>Placa do Veículo</label>
+        <input id="inp-placa" class="placa-input" type="text" maxlength="8" placeholder="ABC-1234" autocomplete="off" spellcheck="false">
+      </div>
+      <button class="btn-primary" id="btn-iniciar" disabled>Iniciar Inspeção</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TELA INSPEÇÃO
+══════════════════════════════════════════ -->
+<div id="screen-inspecao" class="screen">
+  <div class="app-header">
+    <div class="header-meta">
+      <div class="header-placa" id="hdr-placa">—</div>
+      <div class="header-inspetor" id="hdr-inspetor">—</div>
+    </div>
+    <button class="btn-icon" id="btn-ver-resumo">FINALIZAR →</button>
+  </div>
+
+  <div class="tabs" id="tabs-container"></div>
+
+  <div class="insp-body" id="insp-body">
+    <!-- Conteúdo dinâmico por vista -->
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TELA RESUMO
+══════════════════════════════════════════ -->
+<div id="screen-resumo" class="screen">
+  <div class="resumo-header">
+    <div class="resumo-title">Resumo da Inspeção</div>
+    <div class="resumo-meta" id="res-meta">—</div>
+  </div>
+  <div class="resumo-body" id="res-body"></div>
+  <div class="resumo-footer">
+    <div class="status-msg" id="status-msg"></div>
+    <button class="btn-enviar" id="btn-enviar">↑ Enviar para o Sheets</button>
+    <button class="btn-nova" id="btn-nova-insp">Nova Inspeção</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     POPUP AVARIA
+══════════════════════════════════════════ -->
+<div class="overlay" id="overlay">
+  <div class="sheet" id="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div>
+        <div class="sheet-peca" id="sheet-peca">—</div>
+        <div class="sheet-vista" id="sheet-vista">—</div>
+      </div>
+      <button class="btn-close-sheet" id="btn-close-sheet">×</button>
+    </div>
+    <div class="sheet-body">
+      <div>
+        <div class="resumo-section-title">Tipo de avaria</div>
+        <div class="tipo-grid" id="tipo-grid"></div>
+      </div>
+      <div class="obs-field">
+        <label>Observação (opcional)</label>
+        <textarea id="obs-input" placeholder="Detalhe a avaria..."></textarea>
+      </div>
+    </div>
+    <div class="sheet-footer">
+      <button class="btn-cancel" id="btn-cancel-sheet">Cancelar</button>
+      <button class="btn-registrar" id="btn-registrar" disabled>Registrar</button>
+    </div>
+    <div style="padding:0 20px 12px;display:none" id="remover-wrap">
+      <button class="btn-remover-dano" id="btn-remover-dano">Remover dano registrado</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════ -->
+<script>
+// ─── ESTADO ───
+const state = {
+  placa: '',
+  inspetor: '',
+  vistaAtual: 'frente',
+  danos: {},       // { 'frente:farol': { vista, hotspotId, peca, tipo, obs } }
+  hotspotAtivo: null
+};
+
+// ─── UTILS ───
+const $ = id => document.getElementById(id);
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+}
+
+// ─── HOME ───
+function initHome() {
+  const sel = $('sel-inspetor');
+  CONFIG.INSPETORES.forEach(n => {
+    const o = document.createElement('option');
+    o.value = n; o.textContent = n;
+    sel.appendChild(o);
+  });
+  const inp = $('inp-placa');
+  inp.addEventListener('input', () => {
+    inp.value = inp.value.toUpperCase().replace(/[^A-Z0-9\-]/g, '');
+    $('btn-iniciar').disabled = inp.value.trim().length < 3;
+  });
+  $('btn-iniciar').addEventListener('click', () => {
+    state.placa = inp.value.trim();
+    state.inspetor = sel.value;
+    state.danos = {};
+    iniciarInspecao();
+  });
+}
+
+// ─── INSPEÇÃO ───
+function iniciarInspecao() {
+  $('hdr-placa').textContent = state.placa;
+  $('hdr-inspetor').textContent = state.inspetor;
+  buildTabs();
+  renderVista('frente');
+  showScreen('screen-inspecao');
+}
+
+function buildTabs() {
+  const cont = $('tabs-container');
+  cont.innerHTML = '';
+  VISTAS.forEach(v => {
+    const tab = document.createElement('div');
+    tab.className = 'tab' + (v.id === 'frente' ? ' active' : '');
+    tab.dataset.vista = v.id;
+    tab.innerHTML = `
+      <div class="tab-label">${v.label}</div>
+      <div class="tab-badge" id="badge-${v.id}">0</div>`;
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      state.vistaAtual = v.id;
+      renderVista(v.id);
+    });
+    cont.appendChild(tab);
+  });
+}
+
+function renderVista(vistaId) {
+  const vista = VISTAS.find(v => v.id === vistaId);
+  const hotspots = HOTSPOTS[vistaId] || [];
+  const body = $('insp-body');
+
+  body.innerHTML = `
+    <div class="moto-wrap" id="moto-wrap-${vistaId}">
+      <img class="moto-img${vista.square ? ' square' : ''}"
+           src="${vista.img}" alt="${vista.label}" id="moto-img-${vistaId}"
+           draggable="false">
+      ${hotspots.map(h => {
+        const key = `${vistaId}:${h.id}`;
+        const temDano = !!state.danos[key];
+        return `<div class="hotspot${temDano ? ' dano' : ''}"
+                     style="left:${h.x}%;top:${h.y}%"
+                     data-hotspot="${h.id}"
+                     data-vista="${vistaId}"
+                     title="${h.nome}">
+                  <div class="hotspot-dot"><div class="hotspot-inner"></div></div>
+                </div>`;
+      }).join('')}
+    </div>
+    <div class="danos-section" id="danos-section-${vistaId}">
+      ${renderDanosLista(vistaId)}
+    </div>`;
+
+  // Eventos dos hotspots
+  body.querySelectorAll('.hotspot').forEach(el => {
+    el.addEventListener('click', () => {
+      const hId = el.dataset.hotspot;
+      const vId = el.dataset.vista;
+      const h = HOTSPOTS[vId].find(x => x.id === hId);
+      abrirSheet(vId, hId, h.nome);
+    });
+  });
+}
+
+function renderDanosLista(vistaId) {
+  const danos = Object.values(state.danos).filter(d => d.vista === vistaId);
+  if (!danos.length) return `<div class="empty-vista">Nenhuma avaria registrada nesta vista</div>`;
+  return danos.map(d => {
+    const tipo = TIPOS_DANO.find(t => t.id === d.tipo);
+    return `<div class="dano-item">
+      <span class="dano-tipo-tag ${tipo.cls}">${tipo.label}</span>
+      <div style="flex:1;min-width:0">
+        <div class="dano-peca">${d.peca}</div>
+        ${d.obs ? `<div class="dano-obs">${d.obs}</div>` : ''}
+      </div>
+      <button class="dano-del" data-key="${d.vista}:${d.hotspotId}">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function atualizarBadges() {
+  VISTAS.forEach(v => {
+    const count = Object.values(state.danos).filter(d => d.vista === v.id).length;
+    const badge = $(`badge-${v.id}`);
+    badge.textContent = count;
+    badge.classList.toggle('has-items', count > 0);
+  });
+}
+
+// Delegação de evento para remover dano da lista
+$('insp-body').addEventListener('click', e => {
+  const btn = e.target.closest('.dano-del');
+  if (!btn) return;
+  const key = btn.dataset.key;
+  delete state.danos[key];
+  atualizarBadges();
+  renderVista(state.vistaAtual);
+});
+
+// Botão finalizar
+$('btn-ver-resumo').addEventListener('click', renderResumo);
+
+// ─── SHEET DE AVARIA ───
+let sheetVista = null, sheetHotspotId = null, tipoSelecionado = null;
+
+function abrirSheet(vistaId, hotspotId, pecaNome) {
+  sheetVista = vistaId;
+  sheetHotspotId = hotspotId;
+  tipoSelecionado = null;
+
+  $('sheet-peca').textContent = pecaNome;
+  const vLabel = VISTAS.find(v => v.id === vistaId)?.label || vistaId;
+  $('sheet-vista').textContent = `Vista: ${vLabel}`;
+  $('obs-input').value = '';
+
+  // Monta grid de tipos
+  const grid = $('tipo-grid');
+  grid.innerHTML = TIPOS_DANO.map(t =>
+    `<button class="tipo-btn" data-tipo="${t.id}">
+       <span class="tipo-btn-icon">${t.icon}</span>
+       <span class="tipo-btn-label">${t.label}</span>
+     </button>`
+  ).join('');
+
+  // Verifica se já tem dano neste ponto
+  const key = `${vistaId}:${hotspotId}`;
+  const existente = state.danos[key];
+  const removerWrap = $('remover-wrap');
+
+  if (existente) {
+    // Pré-seleciona tipo e obs
+    tipoSelecionado = existente.tipo;
+    $('obs-input').value = existente.obs || '';
+    grid.querySelector(`[data-tipo="${existente.tipo}"]`)?.classList.add('selected');
+    $('btn-registrar').disabled = false;
+    removerWrap.style.display = 'block';
+  } else {
+    $('btn-registrar').disabled = true;
+    removerWrap.style.display = 'none';
+  }
+
+  grid.querySelectorAll('.tipo-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      grid.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      tipoSelecionado = btn.dataset.tipo;
+      $('btn-registrar').disabled = false;
+    });
+  });
+
+  $('overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function fecharSheet() {
+  $('overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  sheetVista = null; sheetHotspotId = null; tipoSelecionado = null;
+}
+
+$('btn-close-sheet').addEventListener('click', fecharSheet);
+$('btn-cancel-sheet').addEventListener('click', fecharSheet);
+$('overlay').addEventListener('click', e => { if (e.target === $('overlay')) fecharSheet(); });
+
+$('btn-registrar').addEventListener('click', () => {
+  if (!tipoSelecionado) return;
+  const key = `${sheetVista}:${sheetHotspotId}`;
+  const peca = HOTSPOTS[sheetVista].find(h => h.id === sheetHotspotId)?.nome || '';
+  state.danos[key] = {
+    vista: sheetVista,
+    hotspotId: sheetHotspotId,
+    peca,
+    tipo: tipoSelecionado,
+    obs: $('obs-input').value.trim()
+  };
+  atualizarBadges();
+  fecharSheet();
+  renderVista(state.vistaAtual);
+});
+
+$('btn-remover-dano').addEventListener('click', () => {
+  const key = `${sheetVista}:${sheetHotspotId}`;
+  delete state.danos[key];
+  atualizarBadges();
+  fecharSheet();
+  renderVista(state.vistaAtual);
+});
+
+// ─── RESUMO ───
+function renderResumo() {
+  const danos = Object.values(state.danos);
+  const ts = new Date().toLocaleString('pt-BR');
+
+  $('res-meta').textContent = `${state.placa} · ${state.inspetor} · ${ts}`;
+
+  const body = $('res-body');
+  if (!danos.length) {
+    body.innerHTML = `<div class="resumo-ok">✓ Nenhuma avaria registrada — veículo aprovado</div>`;
+  } else {
+    const porVista = {};
+    danos.forEach(d => {
+      if (!porVista[d.vista]) porVista[d.vista] = [];
+      porVista[d.vista].push(d);
+    });
+    body.innerHTML = VISTAS.filter(v => porVista[v.id]).map(v =>
+      `<div>
+         <div class="resumo-section-title">${v.label}</div>
+         ${porVista[v.id].map(d => {
+           const tipo = TIPOS_DANO.find(t => t.id === d.tipo);
+           return `<div class="dano-item" style="margin-bottom:6px">
+             <span class="dano-tipo-tag ${tipo.cls}">${tipo.label}</span>
+             <div style="flex:1;min-width:0">
+               <div class="dano-peca">${d.peca}</div>
+               ${d.obs ? `<div class="dano-obs">${d.obs}</div>` : ''}
+             </div>
+           </div>`;
+         }).join('')}
+       </div>`
+    ).join('');
+  }
+
+  showScreen('screen-resumo');
+}
+
+// ─── ENVIAR PRO SHEETS ───
+$('btn-enviar').addEventListener('click', async () => {
+  const btn = $('btn-enviar');
+  const msg = $('status-msg');
+  btn.disabled = true;
+  msg.className = 'status-msg sending';
+  msg.textContent = 'Enviando...';
+
+  const payload = {
+    placa: state.placa,
+    inspetor: state.inspetor,
+    timestamp: new Date().toISOString(),
+    danos: Object.values(state.danos)
+  };
+
+  try {
+    const url = CONFIG.GAS_URL + '?callback=cb';
+    await new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      window.cb = (res) => {
+        delete window.cb;
+        document.head.removeChild(script);
+        if (res && res.ok) resolve(res);
+        else reject(new Error(res?.msg || 'Erro'));
+      };
+      script.src = url + '&data=' + encodeURIComponent(JSON.stringify(payload));
+      script.onerror = () => reject(new Error('Falha de rede'));
+      document.head.appendChild(script);
+      setTimeout(() => reject(new Error('Timeout')), 15000);
+    });
+    msg.className = 'status-msg success';
+    msg.textContent = '✓ Enviado com sucesso!';
+  } catch (err) {
+    msg.className = 'status-msg error';
+    msg.textContent = '✕ Erro: ' + err.message;
+    btn.disabled = false;
+  }
+});
+
+$('btn-nova-insp').addEventListener('click', () => {
+  state.placa = ''; state.inspetor = ''; state.danos = {};
+  $('inp-placa').value = '';
+  $('btn-iniciar').disabled = true;
+  $('status-msg').className = 'status-msg';
+  showScreen('screen-home');
+});
+
+// ─── BOOT ───
+initHome();
+</script>
+</body>
+</html>
