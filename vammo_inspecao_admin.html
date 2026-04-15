@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vammo — Admin Hotspots</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#2EC2FF;
+  --blue-dim:rgba(46,194,255,.15);
+  --bg:#080c10;
+  --surface:#0e1318;
+  --surface2:#141b22;
+  --surface3:#1c2630;
+  --border:rgba(46,194,255,.18);
+  --border-dim:rgba(255,255,255,.07);
+  --text:#e8f0f5;
+  --text-dim:#6b8090;
+  --text-muted:#3a4d5a;
+  --red:#ff4d6a;
+  --green:#06d6a0;
+  --yellow:#ffd166;
+  --r:10px;--r-sm:6px;
+}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:'Barlow',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  display:flex;flex-direction:column;
+  height:100dvh;overflow:hidden;
+}
+
+/* ─── HEADER ─── */
+.top-bar{
+  display:flex;align-items:center;
+  justify-content:space-between;
+  padding:10px 16px;
+  background:var(--surface);
+  border-bottom:1px solid var(--border-dim);
+  flex-shrink:0;gap:12px;
+}
+.top-brand{
+  font-family:'Rajdhani',sans-serif;
+  font-size:16px;font-weight:700;
+  letter-spacing:3px;color:var(--blue);
+}
+.top-sub{
+  font-family:'Rajdhani',sans-serif;
+  font-size:11px;letter-spacing:2px;
+  color:var(--text-dim);text-transform:uppercase;
+}
+.top-actions{display:flex;gap:8px}
+.btn-sm{
+  background:none;
+  border:1px solid var(--border-dim);
+  border-radius:var(--r-sm);
+  color:var(--text-dim);
+  font-family:'Rajdhani',sans-serif;
+  font-size:12px;font-weight:600;
+  letter-spacing:1.5px;text-transform:uppercase;
+  padding:7px 12px;cursor:pointer;
+  transition:all .15s;white-space:nowrap;
+}
+.btn-sm:hover{border-color:var(--blue);color:var(--blue)}
+.btn-sm.primary{
+  background:var(--blue);color:#000;
+  border-color:var(--blue);
+}
+.btn-sm.primary:hover{opacity:.85}
+
+/* ─── TABS ─── */
+.tabs{
+  display:flex;background:var(--surface);
+  border-bottom:1px solid var(--border-dim);
+  flex-shrink:0;
+}
+.tab{
+  flex:1;padding:10px 6px 8px;
+  cursor:pointer;border-bottom:2px solid transparent;
+  transition:all .15s;text-align:center;
+}
+.tab.active{border-bottom-color:var(--blue)}
+.tab-label{
+  font-family:'Rajdhani',sans-serif;
+  font-size:12px;font-weight:600;
+  letter-spacing:2px;text-transform:uppercase;
+  color:var(--text-dim);transition:color .15s;
+}
+.tab.active .tab-label{color:var(--blue)}
+.tab-count{
+  font-family:'Rajdhani',sans-serif;
+  font-size:10px;color:var(--text-muted);
+  margin-top:1px;
+}
+.tab.active .tab-count{color:var(--text-dim)}
+
+/* ─── MAIN ─── */
+.main{flex:1;display:flex;overflow:hidden}
+
+/* ─── CANVAS AREA ─── */
+.canvas-area{
+  flex:1;overflow:auto;
+  display:flex;align-items:flex-start;
+  justify-content:center;
+  padding:16px;
+  background:var(--bg);
+  position:relative;
+}
+.canvas-wrap{
+  position:relative;
+  display:inline-block;
+  cursor:crosshair;
+  user-select:none;
+  max-width:100%;
+}
+.canvas-wrap img{
+  display:block;
+  max-width:min(700px, calc(100vw - 280px));
+  height:auto;
+  border-radius:var(--r);
+  background:#f5f5f5;
+  pointer-events:none;
+}
+.hint{
+  position:absolute;top:8px;left:50%;transform:translateX(-50%);
+  background:rgba(46,194,255,.1);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:5px 14px;
+  font-family:'Rajdhani',sans-serif;
+  font-size:11px;letter-spacing:2px;
+  color:var(--blue);white-space:nowrap;
+  pointer-events:none;
+}
+
+/* ─── HOTSPOT ─── */
+.hs{
+  position:absolute;
+  transform:translate(-50%,-50%);
+  cursor:grab;z-index:10;
+}
+.hs:active{cursor:grabbing}
+.hs-dot{
+  width:24px;height:24px;border-radius:50%;
+  border:2.5px solid var(--blue);
+  background:rgba(46,194,255,.2);
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color .15s,background .15s;
+}
+.hs.selected .hs-dot{
+  border-color:var(--yellow);
+  background:rgba(255,209,102,.2);
+  box-shadow:0 0 0 4px rgba(255,209,102,.15);
+}
+.hs-inner{width:7px;height:7px;border-radius:50%;background:var(--blue)}
+.hs.selected .hs-inner{background:var(--yellow)}
+.hs-label{
+  position:absolute;
+  top:26px;left:50%;transform:translateX(-50%);
+  background:rgba(8,12,16,.85);
+  border:1px solid var(--border-dim);
+  border-radius:4px;
+  padding:2px 7px;
+  font-family:'Rajdhani',sans-serif;
+  font-size:10px;letter-spacing:.5px;
+  color:var(--text-dim);
+  white-space:nowrap;
+  pointer-events:none;
+  max-width:120px;
+  overflow:hidden;text-overflow:ellipsis;
+}
+.hs.selected .hs-label{color:var(--yellow);border-color:rgba(255,209,102,.3)}
+
+/* ─── PAINEL DIREITO ─── */
+.panel{
+  width:260px;flex-shrink:0;
+  background:var(--surface);
+  border-left:1px solid var(--border-dim);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+.panel-header{
+  padding:14px 16px 10px;
+  border-bottom:1px solid var(--border-dim);
+  flex-shrink:0;
+}
+.panel-title{
+  font-family:'Rajdhani',sans-serif;
+  font-size:12px;font-weight:700;
+  letter-spacing:3px;text-transform:uppercase;
+  color:var(--text-dim);
+}
+.panel-body{flex:1;overflow-y:auto;padding:12px}
+.panel-body::-webkit-scrollbar{width:4px}
+.panel-body::-webkit-scrollbar-track{background:transparent}
+.panel-body::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:2px}
+
+/* ─── FORM EDIÇÃO ─── */
+.edit-form{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:var(--r-sm);
+  padding:14px;
+  margin-bottom:12px;
+  display:flex;flex-direction:column;gap:10px;
+}
+.edit-form-title{
+  font-family:'Rajdhani',sans-serif;
+  font-size:11px;font-weight:700;
+  letter-spacing:2px;text-transform:uppercase;
+  color:var(--blue);margin-bottom:2px;
+}
+.field label{
+  font-family:'Rajdhani',sans-serif;
+  font-size:10px;font-weight:600;
+  letter-spacing:2px;color:var(--text-muted);
+  text-transform:uppercase;display:block;
+  margin-bottom:5px;
+}
+.field input{
+  background:var(--surface);
+  border:1px solid var(--border-dim);
+  border-radius:var(--r-sm);
+  color:var(--text);
+  font-family:'Rajdhani',sans-serif;
+  font-size:14px;font-weight:500;
+  padding:9px 12px;outline:none;
+  transition:border-color .2s;width:100%;
+}
+.field input:focus{border-color:var(--blue)}
+.coords{
+  display:flex;gap:8px;
+}
+.coords .field{flex:1}
+.coord-val{
+  font-family:'Rajdhani',sans-serif;
+  font-size:20px;font-weight:700;
+  color:var(--text);text-align:center;
+  padding:8px 0 2px;
+}
+.coord-label{
+  font-family:'Rajdhani',sans-serif;
+  font-size:9px;letter-spacing:2px;
+  color:var(--text-muted);text-align:center;
+  text-transform:uppercase;
+}
+.btn-del{
+  width:100%;background:none;
+  border:1px solid rgba(255,77,106,.25);
+  border-radius:var(--r-sm);
+  color:var(--red);
+  font-family:'Rajdhani',sans-serif;
+  font-size:11px;font-weight:600;
+  letter-spacing:2px;text-transform:uppercase;
+  padding:8px;cursor:pointer;
+  transition:all .15s;
+}
+.btn-del:hover{background:rgba(255,77,106,.08)}
+
+/* ─── LISTA HOTSPOTS ─── */
+.hs-list{display:flex;flex-direction:column;gap:6px}
+.hs-list-item{
+  display:flex;align-items:center;gap:8px;
+  padding:9px 10px;
+  background:var(--surface2);
+  border:1px solid var(--border-dim);
+  border-radius:var(--r-sm);
+  cursor:pointer;transition:border-color .15s;
+}
+.hs-list-item:hover,.hs-list-item.active{border-color:var(--blue)}
+.hs-list-item.active{background:var(--blue-dim)}
+.hs-list-num{
+  font-family:'Rajdhani',sans-serif;
+  font-size:11px;font-weight:700;
+  color:var(--text-muted);
+  min-width:18px;text-align:center;
+}
+.hs-list-name{
+  font-family:'Rajdhani',sans-serif;
+  font-size:13px;font-weight:500;
+  color:var(--text);flex:1;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.hs-list-coords{
+  font-family:'Rajdhani',sans-serif;
+  font-size:10px;color:var(--text-muted);
+  white-space:nowrap;
+}
+.empty-panel{
+  text-align:center;padding:24px 8px;
+  color:var(--text-muted);
+  font-family:'Rajdhani',sans-serif;
+  font-size:12px;letter-spacing:1px;
+}
+
+/* ─── MODAL EXPORT ─── */
+.overlay{
+  display:none;position:fixed;
+  inset:0;background:rgba(0,0,0,.7);
+  z-index:200;align-items:center;
+  justify-content:center;padding:20px;
+  backdrop-filter:blur(4px);
+}
+.overlay.open{display:flex}
+.modal{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  width:100%;max-width:640px;
+  max-height:85vh;display:flex;
+  flex-direction:column;
+  animation:fadeUp .2s ease;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.modal-header{
+  padding:16px 20px;
+  border-bottom:1px solid var(--border-dim);
+  display:flex;align-items:center;
+  justify-content:space-between;
+}
+.modal-title{
+  font-family:'Rajdhani',sans-serif;
+  font-size:16px;font-weight:700;
+  letter-spacing:1px;color:var(--text);
+}
+.modal-close{
+  background:none;border:none;
+  color:var(--text-dim);font-size:22px;
+  cursor:pointer;padding:2px;
+}
+.modal-body{flex:1;overflow-y:auto;padding:16px 20px}
+.modal-instructions{
+  font-family:'Rajdhani',sans-serif;
+  font-size:12px;letter-spacing:1px;
+  color:var(--text-dim);
+  padding:10px 14px;
+  background:var(--blue-dim);
+  border:1px solid var(--border);
+  border-radius:var(--r-sm);
+  margin-bottom:12px;
+  line-height:1.6;
+}
+.code-block{
+  background:#000;
+  border:1px solid var(--border-dim);
+  border-radius:var(--r-sm);
+  padding:14px 16px;
+  font-family:'Courier New',monospace;
+  font-size:11.5px;
+  color:#a8d8f0;
+  overflow-x:auto;
+  white-space:pre;
+  line-height:1.6;
+  max-height:400px;
+  overflow-y:auto;
+}
+.modal-footer{
+  padding:12px 20px;
+  border-top:1px solid var(--border-dim);
+  display:flex;gap:10px;justify-content:flex-end;
+}
+
+/* ─── MODAL NOME ─── */
+.modal-sm{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  width:100%;max-width:360px;
+  padding:20px;
+  display:flex;flex-direction:column;gap:16px;
+  animation:fadeUp .2s ease;
+}
+.modal-sm-title{
+  font-family:'Rajdhani',sans-serif;
+  font-size:16px;font-weight:700;
+  color:var(--text);letter-spacing:1px;
+}
+.modal-sm-sub{
+  font-family:'Rajdhani',sans-serif;
+  font-size:11px;letter-spacing:2px;
+  color:var(--text-dim);text-transform:uppercase;
+  margin-top:-8px;
+}
+.modal-sm-actions{display:flex;gap:8px}
+.btn-cancel-sm{
+  flex:1;background:none;
+  border:1px solid var(--border-dim);
+  border-radius:var(--r-sm);
+  color:var(--text-dim);
+  font-family:'Rajdhani',sans-serif;
+  font-size:13px;font-weight:600;
+  letter-spacing:2px;text-transform:uppercase;
+  padding:11px;cursor:pointer;
+}
+.btn-ok-sm{
+  flex:2;background:var(--blue);
+  border:none;border-radius:var(--r-sm);
+  color:#000;
+  font-family:'Rajdhani',sans-serif;
+  font-size:13px;font-weight:700;
+  letter-spacing:2px;text-transform:uppercase;
+  padding:11px;cursor:pointer;
+  transition:opacity .15s;
+}
+.btn-ok-sm:disabled{opacity:.35;cursor:not-allowed}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="top-bar">
+  <div>
+    <div class="top-brand">VAMMO</div>
+    <div class="top-sub">Admin — Configurar Hotspots</div>
+  </div>
+  <div class="top-actions">
+    <button class="btn-sm" id="btn-clear-vista">Limpar Vista</button>
+    <button class="btn-sm" id="btn-export">Ver JSON</button>
+    <button class="btn-sm primary" id="btn-download-html">↓ Baixar HTML atualizado</button>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs" id="tabs"></div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- CANVAS -->
+  <div class="canvas-area" id="canvas-area">
+    <div>
+      <div class="hint" id="hint">Clique na imagem para adicionar um ponto</div>
+      <div class="canvas-wrap" id="canvas-wrap">
+        <img id="moto-img" src="" alt="Vista da moto" draggable="false">
+      </div>
+    </div>
+  </div>
+
+  <!-- PAINEL -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title" id="panel-title">Pontos — Frente</div>
+    </div>
+    <div class="panel-body" id="panel-body">
+      <div class="empty-panel">Nenhum ponto cadastrado.<br>Clique na imagem para adicionar.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- OVERLAY NOME -->
+<div class="overlay" id="overlay-nome">
+  <div class="modal-sm">
+    <div>
+      <div class="modal-sm-title">Novo ponto</div>
+      <div class="modal-sm-sub" id="new-coords-label">x: 0% · y: 0%</div>
+    </div>
+    <div class="field">
+      <label>Nome da peça</label>
+      <input type="text" id="input-nome" placeholder="Ex: Carenagem Lateral Dir." autocomplete="off">
+    </div>
+    <div class="modal-sm-actions">
+      <button class="btn-cancel-sm" id="btn-cancel-nome">Cancelar</button>
+      <button class="btn-ok-sm" id="btn-ok-nome" disabled>Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAY EXPORT -->
+<div class="overlay" id="overlay-export">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Exportar configuração de hotspots</div>
+      <button class="modal-close" id="btn-close-export">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-instructions">
+        Copie o bloco abaixo e substitua o objeto <strong>HOTSPOTS</strong> no arquivo <strong>vammo_inspecao.html</strong> (procure por "const HOTSPOTS = {" no início do JS).
+      </div>
+      <div class="code-block" id="export-code"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm" id="btn-close-export2">Fechar</button>
+      <button class="btn-sm primary" id="btn-copy">Copiar tudo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── CONFIG VISTAS ───
+const VISTAS = [
+  { id: 'frente',   label: 'Frente',   img: 'moto_front_view.png'       },
+  { id: 'traseira', label: 'Traseira', img: 'moto_rear_view.png'        },
+  { id: 'lat_esq',  label: 'Lat. Esq', img: 'moto_v3_left.png'          },
+  { id: 'lat_dir',  label: 'Lat. Dir', img: 'moto_left_side_view_v2.png'}
+];
+
+// ─── ESTADO ───
+let vistaAtual = 'frente';
+let hotspots = { frente:[], traseira:[], lat_esq:[], lat_dir:[] };
+let selectedHs = null;   // { vista, idx }
+let pendingClick = null; // { x, y } aguardando nome
+let dragging = null;     // { el, vista, idx, startX, startY, origX, origY }
+let nextId = 1;
+
+const $ = id => document.getElementById(id);
+
+// ─── TABS ───
+function buildTabs() {
+  const cont = $('tabs');
+  cont.innerHTML = '';
+  VISTAS.forEach(v => {
+    const tab = document.createElement('div');
+    tab.className = 'tab' + (v.id === vistaAtual ? ' active' : '');
+    tab.dataset.vista = v.id;
+    tab.innerHTML = `
+      <div class="tab-label">${v.label}</div>
+      <div class="tab-count" id="cnt-${v.id}">0 pontos</div>`;
+    tab.addEventListener('click', () => {
+      selectedHs = null;
+      vistaAtual = v.id;
+      buildTabs();
+      renderImagem();
+      renderCanvas();
+      renderPanel();
+    });
+    cont.appendChild(tab);
+  });
+  VISTAS.forEach(v => {
+    const el = $(`cnt-${v.id}`);
+    if (el) el.textContent = hotspots[v.id].length + ' ponto' + (hotspots[v.id].length !== 1 ? 's' : '');
+  });
+}
+
+// ─── IMAGEM ───
+function renderImagem() {
+  const v = VISTAS.find(x => x.id === vistaAtual);
+  $('moto-img').src = v.img;
+  $('panel-title').textContent = `Pontos — ${v.label}`;
+}
+
+// ─── CANVAS ───
+function renderCanvas() {
+  const wrap = $('canvas-wrap');
+  // Remove hotspots antigos
+  wrap.querySelectorAll('.hs').forEach(el => el.remove());
+
+  hotspots[vistaAtual].forEach((h, idx) => {
+    const el = document.createElement('div');
+    el.className = 'hs' + (selectedHs && selectedHs.idx === idx ? ' selected' : '');
+    el.style.left = h.x + '%';
+    el.style.top  = h.y + '%';
+    el.dataset.idx = idx;
+    el.innerHTML = `
+      <div class="hs-dot"><div class="hs-inner"></div></div>
+      <div class="hs-label">${h.nome}</div>`;
+
+    // Click para selecionar
+    el.addEventListener('mousedown', e => {
+      e.stopPropagation();
+      selectHotspot(idx);
+      startDrag(e, el, idx);
+    });
+    el.addEventListener('touchstart', e => {
+      e.stopPropagation();
+      e.preventDefault();
+      selectHotspot(idx);
+      startDragTouch(e, el, idx);
+    }, { passive: false });
+
+    wrap.appendChild(el);
+  });
+}
+
+// ─── SELEÇÃO ───
+function selectHotspot(idx) {
+  selectedHs = { vista: vistaAtual, idx };
+  renderCanvas();
+  renderPanel();
+}
+
+function deselectAll() {
+  selectedHs = null;
+  renderCanvas();
+  renderPanel();
+}
+
+// ─── DRAG MOUSE ───
+function startDrag(e, el, idx) {
+  const wrap = $('canvas-wrap');
+  const rect = wrap.getBoundingClientRect();
+  const h = hotspots[vistaAtual][idx];
+  dragging = { el, vista: vistaAtual, idx, startX: e.clientX, startY: e.clientY, origX: h.x, origY: h.y, rect };
+
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+}
+
+function onMouseMove(e) {
+  if (!dragging) return;
+  const { rect, origX, origY, startX, startY, idx, vista } = dragging;
+  const dx = ((e.clientX - startX) / rect.width) * 100;
+  const dy = ((e.clientY - startY) / rect.height) * 100;
+  const nx = Math.max(2, Math.min(98, origX + dx));
+  const ny = Math.max(2, Math.min(98, origY + dy));
+  hotspots[vista][idx].x = parseFloat(nx.toFixed(1));
+  hotspots[vista][idx].y = parseFloat(ny.toFixed(1));
+  dragging.el.style.left = nx + '%';
+  dragging.el.style.top  = ny + '%';
+  // Atualiza painel em tempo real
+  if (selectedHs && selectedHs.idx === idx) renderPanel();
+}
+
+function onMouseUp() {
+  dragging = null;
+  document.removeEventListener('mousemove', onMouseMove);
+  document.removeEventListener('mouseup', onMouseUp);
+  buildTabs();
+}
+
+// ─── DRAG TOUCH ───
+function startDragTouch(e, el, idx) {
+  const touch = e.touches[0];
+  const wrap = $('canvas-wrap');
+  const rect = wrap.getBoundingClientRect();
+  const h = hotspots[vistaAtual][idx];
+  dragging = { el, vista: vistaAtual, idx, startX: touch.clientX, startY: touch.clientY, origX: h.x, origY: h.y, rect };
+  document.addEventListener('touchmove', onTouchMove, { passive: false });
+  document.addEventListener('touchend', onTouchEnd);
+}
+
+function onTouchMove(e) {
+  e.preventDefault();
+  if (!dragging) return;
+  const touch = e.touches[0];
+  const { rect, origX, origY, startX, startY, idx, vista } = dragging;
+  const dx = ((touch.clientX - startX) / rect.width) * 100;
+  const dy = ((touch.clientY - startY) / rect.height) * 100;
+  const nx = Math.max(2, Math.min(98, origX + dx));
+  const ny = Math.max(2, Math.min(98, origY + dy));
+  hotspots[vista][idx].x = parseFloat(nx.toFixed(1));
+  hotspots[vista][idx].y = parseFloat(ny.toFixed(1));
+  dragging.el.style.left = nx + '%';
+  dragging.el.style.top  = ny + '%';
+  if (selectedHs && selectedHs.idx === idx) renderPanel();
+}
+
+function onTouchEnd() {
+  dragging = null;
+  document.removeEventListener('touchmove', onTouchMove);
+  document.removeEventListener('touchend', onTouchEnd);
+  buildTabs();
+}
+
+// ─── CLICK NA IMAGEM ─── (adicionar novo ponto)
+$('canvas-wrap').addEventListener('click', e => {
+  if (e.target.closest('.hs')) return;
+  const wrap = $('canvas-wrap');
+  const rect = wrap.getBoundingClientRect();
+  const x = parseFloat((((e.clientX - rect.left) / rect.width) * 100).toFixed(1));
+  const y = parseFloat((((e.clientY - rect.top) / rect.height) * 100).toFixed(1));
+  pendingClick = { x, y };
+  $('new-coords-label').textContent = `x: ${x}% · y: ${y}%`;
+  $('input-nome').value = '';
+  $('btn-ok-nome').disabled = true;
+  $('overlay-nome').classList.add('open');
+  setTimeout(() => $('input-nome').focus(), 50);
+});
+
+// Deselect ao clicar no canvas fora
+$('canvas-wrap').addEventListener('mousedown', e => {
+  if (!e.target.closest('.hs')) deselectAll();
+});
+
+// ─── MODAL NOME ───
+$('input-nome').addEventListener('input', () => {
+  $('btn-ok-nome').disabled = $('input-nome').value.trim().length < 2;
+});
+$('input-nome').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !$('btn-ok-nome').disabled) confirmarNome();
+  if (e.key === 'Escape') cancelarNome();
+});
+$('btn-ok-nome').addEventListener('click', confirmarNome);
+$('btn-cancel-nome').addEventListener('click', cancelarNome);
+
+function confirmarNome() {
+  const nome = $('input-nome').value.trim();
+  if (!nome || !pendingClick) return;
+  const id = 'hs_' + (nextId++);
+  hotspots[vistaAtual].push({ id, nome, x: pendingClick.x, y: pendingClick.y });
+  pendingClick = null;
+  $('overlay-nome').classList.remove('open');
+  selectedHs = { vista: vistaAtual, idx: hotspots[vistaAtual].length - 1 };
+  buildTabs();
+  renderCanvas();
+  renderPanel();
+}
+
+function cancelarNome() {
+  pendingClick = null;
+  $('overlay-nome').classList.remove('open');
+}
+
+// ─── PAINEL ───
+function renderPanel() {
+  const body = $('panel-body');
+  const lista = hotspots[vistaAtual];
+
+  if (!lista.length) {
+    body.innerHTML = `<div class="empty-panel">Nenhum ponto cadastrado.<br>Clique na imagem para adicionar.</div>`;
+    return;
+  }
+
+  let html = '';
+
+  // Form de edição se selecionado
+  if (selectedHs && selectedHs.vista === vistaAtual) {
+    const h = lista[selectedHs.idx];
+    html += `
+      <div class="edit-form">
+        <div class="edit-form-title">Ponto selecionado</div>
+        <div class="field">
+          <label>Nome da peça</label>
+          <input type="text" id="edit-nome" value="${h.nome}">
+        </div>
+        <div class="coords">
+          <div>
+            <div class="coord-val" id="coord-x">${h.x}</div>
+            <div class="coord-label">X %</div>
+          </div>
+          <div>
+            <div class="coord-val" id="coord-y">${h.y}</div>
+            <div class="coord-label">Y %</div>
+          </div>
+        </div>
+        <button class="btn-del" id="btn-del-hs">Remover este ponto</button>
+      </div>`;
+  }
+
+  // Lista
+  html += `<div class="hs-list">`;
+  lista.forEach((h, idx) => {
+    const isActive = selectedHs && selectedHs.vista === vistaAtual && selectedHs.idx === idx;
+    html += `
+      <div class="hs-list-item${isActive ? ' active' : ''}" data-idx="${idx}">
+        <span class="hs-list-num">${idx + 1}</span>
+        <span class="hs-list-name">${h.nome}</span>
+        <span class="hs-list-coords">${h.x}·${h.y}</span>
+      </div>`;
+  });
+  html += `</div>`;
+
+  body.innerHTML = html;
+
+  // Eventos do form de edição
+  const editNome = $('edit-nome');
+  if (editNome) {
+    editNome.addEventListener('input', () => {
+      hotspots[vistaAtual][selectedHs.idx].nome = editNome.value;
+      // Atualiza label no canvas
+      const wrap = $('canvas-wrap');
+      const el = wrap.querySelector(`.hs[data-idx="${selectedHs.idx}"] .hs-label`);
+      if (el) el.textContent = editNome.value;
+      buildTabs();
+    });
+  }
+
+  const btnDel = $('btn-del-hs');
+  if (btnDel) {
+    btnDel.addEventListener('click', () => {
+      hotspots[vistaAtual].splice(selectedHs.idx, 1);
+      selectedHs = null;
+      buildTabs();
+      renderCanvas();
+      renderPanel();
+    });
+  }
+
+  // Clique na lista para selecionar
+  body.querySelectorAll('.hs-list-item').forEach(item => {
+    item.addEventListener('click', () => {
+      selectHotspot(parseInt(item.dataset.idx));
+    });
+  });
+}
+
+// ─── LIMPAR VISTA ───
+$('btn-clear-vista').addEventListener('click', () => {
+  if (!hotspots[vistaAtual].length) return;
+  if (!confirm(`Remover todos os ${hotspots[vistaAtual].length} ponto(s) da vista atual?`)) return;
+  hotspots[vistaAtual] = [];
+  selectedHs = null;
+  buildTabs();
+  renderCanvas();
+  renderPanel();
+});
+
+// ─── EXPORT ───
+$('btn-export').addEventListener('click', () => {
+  const code = gerarCodigo();
+  $('export-code').textContent = code;
+  $('overlay-export').classList.add('open');
+});
+
+function gerarCodigo() {
+  const vistaLabels = { frente:'frente', traseira:'traseira', lat_esq:'lat_esq', lat_dir:'lat_dir' };
+  let out = 'const HOTSPOTS = {\n';
+  VISTAS.forEach((v, vi) => {
+    const lista = hotspots[v.id];
+    out += `  ${vistaLabels[v.id]}: [\n`;
+    lista.forEach((h, i) => {
+      const id = h.id || ('hs_' + (i + 1));
+      out += `    { id: '${id}', nome: '${h.nome}', x: ${h.x}, y: ${h.y} }`;
+      out += i < lista.length - 1 ? ',\n' : '\n';
+    });
+    out += `  ]`;
+    out += vi < VISTAS.length - 1 ? ',\n' : '\n';
+  });
+  out += '};';
+  return out;
+}
+
+$('btn-close-export').addEventListener('click', () => $('overlay-export').classList.remove('open'));
+$('btn-close-export2').addEventListener('click', () => $('overlay-export').classList.remove('open'));
+$('overlay-export').addEventListener('click', e => {
+  if (e.target === $('overlay-export')) $('overlay-export').classList.remove('open');
+});
+
+$('btn-copy').addEventListener('click', () => {
+  navigator.clipboard.writeText($('export-code').textContent).then(() => {
+    const btn = $('btn-copy');
+    btn.textContent = '✓ Copiado!';
+    setTimeout(() => { btn.textContent = 'Copiar tudo'; }, 2000);
+  });
+});
+
+// ─── DOWNLOAD HTML ATUALIZADO ───
+$('btn-download-html').addEventListener('click', async () => {
+  const btn = $('btn-download-html');
+  btn.textContent = 'Buscando...';
+  btn.disabled = true;
+
+  try {
+    // Busca o HTML do inspetor do mesmo diretório
+    const res = await fetch('vammo_inspecao.html?nocache=' + Date.now());
+    if (!res.ok) throw new Error('Arquivo não encontrado');
+    let html = await res.text();
+
+    // Gera o novo bloco HOTSPOTS
+    const novoHotspots = gerarCodigo();
+
+    // Substitui o bloco HOTSPOTS no HTML
+    const regex = /const HOTSPOTS\s*=\s*\{[\s\S]*?
+\};/;
+    if (!regex.test(html)) throw new Error('Bloco HOTSPOTS não encontrado no HTML');
+    html = html.replace(regex, novoHotspots);
+
+    // Download
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'vammo_inspecao.html';
+    a.click();
+    URL.revokeObjectURL(url);
+
+    btn.textContent = '✓ Baixado!';
+    setTimeout(() => { btn.textContent = '↓ Baixar HTML atualizado'; btn.disabled = false; }, 2500);
+  } catch (err) {
+    alert('Erro: ' + err.message + '\n\nCertifique-se que vammo_inspecao.html está na mesma pasta.');
+    btn.textContent = '↓ Baixar HTML atualizado';
+    btn.disabled = false;
+  }
+});
+
+// ─── BOOT ───
+buildTabs();
+renderImagem();
+renderCanvas();
+renderPanel();
+</script>
+</body>
+</html>
