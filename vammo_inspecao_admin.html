@@ -386,6 +386,80 @@ body{
   margin-top:-8px;
 }
 .modal-sm-actions{display:flex;gap:8px}
+
+/* ─── CONFIG BAR ─── */
+.config-bar{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 16px;
+  background:var(--surface2);
+  border-bottom:1px solid var(--border-dim);
+  flex-shrink:0;flex-wrap:wrap;
+}
+.config-group{display:flex;align-items:center;gap:8px;flex:1;min-width:200px}
+.config-label{
+  font-family:'Rajdhani',sans-serif;
+  font-size:11px;font-weight:600;
+  letter-spacing:2px;text-transform:uppercase;
+  color:var(--text-dim);white-space:nowrap;
+}
+.config-input{
+  flex:1;
+  background:var(--surface);
+  border:1px solid var(--border-dim);
+  border-radius:var(--r-sm);
+  color:var(--text);
+  font-family:'Rajdhani',sans-serif;
+  font-size:13px;font-weight:500;
+  padding:7px 12px;outline:none;
+  transition:border-color .2s;
+  min-width:0;
+}
+.config-input:focus{border-color:var(--blue)}
+.config-input::placeholder{color:var(--text-muted)}
+.config-divider{width:1px;height:24px;background:var(--border-dim);flex-shrink:0}
+
+/* ─── INSP LIST ─── */
+.insp-list{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.insp-item{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 10px;
+  background:var(--surface);
+  border:1px solid var(--border-dim);
+  border-radius:var(--r-sm);
+}
+.insp-name{
+  font-family:'Rajdhani',sans-serif;
+  font-size:13px;font-weight:500;
+  color:var(--text);flex:1;
+}
+.insp-del{
+  background:none;border:none;
+  color:var(--text-muted);cursor:pointer;
+  font-size:16px;padding:2px 4px;
+  transition:color .15s;
+}
+.insp-del:hover{color:var(--red)}
+.insp-add-row{display:flex;gap:8px;margin-top:8px}
+.insp-add-input{
+  flex:1;
+  background:var(--surface);
+  border:1px solid var(--border-dim);
+  border-radius:var(--r-sm);
+  color:var(--text);
+  font-family:'Rajdhani',sans-serif;
+  font-size:13px;padding:8px 12px;
+  outline:none;transition:border-color .2s;
+}
+.insp-add-input:focus{border-color:var(--blue)}
+.insp-add-input::placeholder{color:var(--text-muted)}
+.btn-insp-add{
+  background:var(--blue);border:none;
+  border-radius:var(--r-sm);color:#000;
+  font-family:'Rajdhani',sans-serif;
+  font-size:12px;font-weight:700;
+  letter-spacing:1px;padding:8px 14px;
+  cursor:pointer;white-space:nowrap;
+}
 .img-upload-bar{
   display:flex;align-items:center;gap:10px;
   padding:10px 16px;
@@ -454,6 +528,19 @@ body{
   </div>
 </div>
 
+<!-- CONFIG BAR -->
+<div class="config-bar">
+  <div class="config-group">
+    <span class="config-label">GAS URL</span>
+    <input class="config-input" id="cfg-gas-url" placeholder="https://script.google.com/macros/s/.../exec" type="text">
+  </div>
+  <div class="config-divider"></div>
+  <div class="config-group" style="flex:0;gap:6px">
+    <span class="config-label">Inspetores</span>
+    <button class="btn-sm" id="btn-insp-modal" style="padding:6px 12px">Gerenciar</button>
+  </div>
+</div>
+
 <!-- TABS -->
 <div class="tabs" id="tabs"></div>
 
@@ -488,6 +575,26 @@ body{
     </div>
   </div>
 
+</div>
+
+<!-- OVERLAY INSPETORES -->
+<div class="overlay" id="overlay-insp">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <div class="modal-title">Gerenciar inspetores</div>
+      <button class="modal-close" id="btn-close-insp">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="insp-list" id="insp-list"></div>
+      <div class="insp-add-row">
+        <input class="insp-add-input" id="insp-add-input" placeholder="Nome do inspetor..." type="text">
+        <button class="btn-insp-add" id="btn-insp-add">+ Adicionar</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm primary" id="btn-close-insp2">Fechar</button>
+    </div>
+  </div>
 </div>
 
 <!-- OVERLAY NOME -->
@@ -891,11 +998,21 @@ $('btn-download-html').addEventListener('click', async () => {
     // Gera o novo bloco HOTSPOTS
     const novoHotspots = gerarCodigo();
 
-    // Substitui o bloco HOTSPOTS no HTML
+    // Substitui HOTSPOTS
     const idx1 = html.indexOf('const HOTSPOTS');
     const idx2 = html.indexOf('};', idx1) + 2;
     if (idx1 === -1) throw new Error('Bloco HOTSPOTS não encontrado no HTML');
     html = html.slice(0, idx1) + novoHotspots + html.slice(idx2);
+
+    // Injeta GAS URL
+    const gasUrl = $('cfg-gas-url').value.trim();
+    if (gasUrl) {
+      html = html.replace(/GAS_URL:\s*'[^']*'/, `GAS_URL: '${gasUrl}'`);
+    }
+
+    // Injeta inspetores
+    const inspJson = JSON.stringify(inspetores);
+    html = html.replace(/INSPETORES:\s*\[[^\]]*\]/, `INSPETORES: ${inspJson}`);
 
     // Download
     const blob = new Blob([html], { type: 'text/html' });
@@ -914,6 +1031,59 @@ $('btn-download-html').addEventListener('click', async () => {
     btn.disabled = false;
   }
 });
+
+// ─── CONFIG: GAS URL ───
+// Tenta carregar do localStorage
+const savedGasUrl = localStorage.getItem('vammo_gas_url') || '';
+const savedInspetores = JSON.parse(localStorage.getItem('vammo_inspetores') || '["CX VAMMO"]');
+let inspetores = [...savedInspetores];
+
+if (savedGasUrl) $('cfg-gas-url').value = savedGasUrl;
+
+$('cfg-gas-url').addEventListener('input', () => {
+  localStorage.setItem('vammo_gas_url', $('cfg-gas-url').value.trim());
+});
+
+// ─── MODAL INSPETORES ───
+function renderInspList() {
+  const list = $('insp-list');
+  list.innerHTML = inspetores.map((n, i) => `
+    <div class="insp-item">
+      <span class="insp-name">${n}</span>
+      ${inspetores.length > 1 ? `<button class="insp-del" data-idx="${i}">✕</button>` : ''}
+    </div>`).join('');
+  list.querySelectorAll('.insp-del').forEach(btn => {
+    btn.addEventListener('click', () => {
+      inspetores.splice(parseInt(btn.dataset.idx), 1);
+      localStorage.setItem('vammo_inspetores', JSON.stringify(inspetores));
+      renderInspList();
+    });
+  });
+}
+
+$('btn-insp-modal').addEventListener('click', () => {
+  renderInspList();
+  $('overlay-insp').classList.add('open');
+});
+['btn-close-insp','btn-close-insp2'].forEach(id => {
+  $(id).addEventListener('click', () => $('overlay-insp').classList.remove('open'));
+});
+$('overlay-insp').addEventListener('click', e => {
+  if (e.target === $('overlay-insp')) $('overlay-insp').classList.remove('open');
+});
+
+$('btn-insp-add').addEventListener('click', adicionarInspetor);
+$('insp-add-input').addEventListener('keydown', e => { if (e.key === 'Enter') adicionarInspetor(); });
+
+function adicionarInspetor() {
+  const nome = $('insp-add-input').value.trim();
+  if (!nome) return;
+  if (inspetores.includes(nome)) { $('insp-add-input').value = ''; return; }
+  inspetores.push(nome);
+  localStorage.setItem('vammo_inspetores', JSON.stringify(inspetores));
+  $('insp-add-input').value = '';
+  renderInspList();
+}
 
 // ─── UPLOAD DE IMAGEM ───
 const imgCache = {}; // { vistaId: dataURL }
