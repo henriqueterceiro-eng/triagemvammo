@@ -236,7 +236,6 @@ input.placa-input{
   width:100%;
   background:var(--surface);
   flex-shrink:0;
-  overflow:hidden;
   border-bottom:1px solid var(--border-dim);
 }
 .moto-img{
@@ -253,16 +252,10 @@ input.placa-input{
   transform:translate(-50%,-50%);
   cursor:pointer;
   z-index:10;
-  touch-action:none;
-}
-.hotspot::after{
-  content:'';
-  position:absolute;
-  inset:-14px;
 }
 .hotspot-dot{
-  width:22px;
-  height:22px;
+  width:32px;
+  height:32px;
   border-radius:50%;
   border:2.5px solid var(--blue);
   background:rgba(46,194,255,.15);
@@ -286,7 +279,7 @@ input.placa-input{
 }
 .hotspot.dano .hotspot-dot::before{border-color:rgba(255,77,106,.3)}
 .hotspot-inner{
-  width:6px;height:6px;
+  width:8px;height:8px;
   border-radius:50%;
   background:var(--blue);
 }
@@ -906,6 +899,21 @@ function buildTabs() {
   });
 }
 
+function posicionarHotspots(vistaId) {
+  const img = $(`moto-img-${vistaId}`);
+  const wrap = $(`moto-wrap-${vistaId}`);
+  if (!img || !wrap) return;
+  const hotspotData = HOTSPOTS[vistaId] || [];
+  const els = wrap.querySelectorAll('.hotspot');
+  els.forEach(el => {
+    const hId = el.dataset.hotspot;
+    const h = hotspotData.find(x => x.id === hId);
+    if (!h) return;
+    el.style.left = ((h.x / 100) * img.offsetWidth) + 'px';
+    el.style.top  = ((h.y / 100) * img.offsetHeight) + 'px';
+  });
+}
+
 function renderVista(vistaId) {
   const vista = VISTAS.find(v => v.id === vistaId);
   const hotspots = HOTSPOTS[vistaId] || [];
@@ -920,7 +928,7 @@ function renderVista(vistaId) {
         const key = `${vistaId}:${h.id}`;
         const temDano = !!state.danos[key];
         return `<div class="hotspot${temDano ? ' dano' : ''}"
-                     style="left:${h.x}%;top:${h.y}%"
+                     style="left:0;top:0"
                      data-hotspot="${h.id}"
                      data-vista="${vistaId}"
                      title="${h.nome}">
@@ -931,6 +939,17 @@ function renderVista(vistaId) {
     <div class="danos-section" id="danos-section-${vistaId}">
       ${renderDanosLista(vistaId)}
     </div>`;
+
+  // Posiciona os hotspots após imagem carregar
+  const img = $(`moto-img-${vistaId}`);
+  if (img.complete && img.naturalWidth > 0) {
+    posicionarHotspots(vistaId);
+  } else {
+    img.addEventListener('load', () => posicionarHotspots(vistaId));
+  }
+
+  // Reposiciona se tela girar ou redimensionar
+  window.addEventListener('resize', () => posicionarHotspots(vistaId), { once: true });
 
   // Eventos dos hotspots
   body.querySelectorAll('.hotspot').forEach(el => {
