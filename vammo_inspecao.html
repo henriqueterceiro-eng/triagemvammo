@@ -668,8 +668,8 @@ input.placa-input{
 ══════════════════════════════════════════ -->
 <script>
 const CONFIG = {
-  GAS_URL: 'https://script.google.com/macros/s/SEU_DEPLOYMENT_ID_AQUI/exec',
-  INSPETORES: ['CX VAMMO'],
+  GAS_URL: 'https://script.google.com/a/macros/vammo.com/s/AKfycbyov7cfU19l6MpC3K1cwM6IGfupTwefzgHnY8YwjZnQc-ke8z6Ni7oEdyAgnNkax_9t/exec',
+  INSPETORES: ["CX VAMMO"],
   IMAGENS: {
     frente:    'moto_front_view.png',
     traseira:  'moto_rear_view.png',
@@ -688,10 +688,18 @@ const VISTAS = [
 // ─── HOTSPOTS (x%, y% sobre a imagem) ───
 // Ajuste as coordenadas conforme necessário após ver no app
 const HOTSPOTS = {
-  frente:   [],
-  traseira: [],
-  lat_esq:  [],
-  lat_dir:  []
+  frente: [
+    { id: 'hs_1', nome: 'Paralama Dianteiro', x: 49.9, y: 64.7 }
+  ],
+  traseira: [
+    { id: 'hs_2', nome: 'Placa', x: 49.8, y: 50.5 }
+  ],
+  lat_esq: [
+    { id: 'hs_3', nome: 'Suporte de Celular', x: 50.9, y: 26.4 }
+  ],
+  lat_dir: [
+    { id: 'hs_4', nome: 'Carenagem Frontal Esquerda', x: 30.1, y: 41.2 }
+  ]
 };
 
 const TIPOS_DANO = [
