@@ -668,8 +668,8 @@ input.placa-input{
 ══════════════════════════════════════════ -->
 <script>
 const CONFIG = {
-  GAS_URL: 'https://script.google.com/macros/s/AKfycbyov7cfU19l6MpC3K1cwM6IGfupTwefzgHnY8YwjZnQc-ke8z6Ni7oEdyAgnNkax_9t/exec',
-  INSPETORES: ["CX VAMMO"],
+  GAS_URL: 'https://script.google.com/macros/s/SEU_DEPLOYMENT_ID_AQUI/exec',
+  INSPETORES: ['CX VAMMO'],
   IMAGENS: {
     frente:    'moto_front_view.png',
     traseira:  'moto_rear_view.png',
@@ -688,19 +688,10 @@ const VISTAS = [
 // ─── HOTSPOTS (x%, y% sobre a imagem) ───
 // Ajuste as coordenadas conforme necessário após ver no app
 const HOTSPOTS = {
-  frente: [
-    { id: 'hs_1', nome: 'Carenagem Frontal', x: 50.2, y: 41.7 },
-    { id: 'hs_2', nome: 'Retrovisor Esquerdo', x: 72.7, y: 8.2 }
-  ],
-  traseira: [
-    { id: 'hs_3', nome: 'Placa', x: 49.7, y: 50.9 }
-  ],
-  lat_esq: [
-    { id: 'hs_4', nome: 'Suporte de Celular', x: 50.4, y: 26.4 }
-  ],
-  lat_dir: [
-    { id: 'hs_5', nome: 'Carenagem Frontal Esquerda', x: 29.9, y: 41.4 }
-  ]
+  frente:   [],
+  traseira: [],
+  lat_esq:  [],
+  lat_dir:  []
 };
 
 const TIPOS_DANO = [
@@ -822,7 +813,8 @@ const state = {
   vistaAtual: 'frente',
   danos: {},
   hotspotAtivo: null,
-  enviado: false
+  enviado: false,
+  inicioInspecao: null
 };
 
 // ─── UTILS ───
@@ -869,6 +861,7 @@ function initHome() {
     state.reclamacao = $('inp-reclamacao').value.trim();
     state.danos = {};
     state.enviado = false;
+    state.inicioInspecao = new Date();
     iniciarInspecao();
   });
 }
@@ -1000,6 +993,32 @@ function abrirSheet(vistaId, hotspotId, pecaNome) {
   $('sheet-peca').textContent = pecaNome;
   const vLabel = VISTAS.find(v => v.id === vistaId)?.label || vistaId;
   $('sheet-vista').textContent = `Vista: ${vLabel}`;
+
+  // Alerta especial para placa
+  const hsData = HOTSPOTS[vistaId] ? HOTSPOTS[vistaId].find(function(h){ return h.id === hotspotId; }) : null;
+  const nomeUpper = (hsData ? hsData.nome : '').toUpperCase();
+  if (nomeUpper.indexOf('PLACA') !== -1) {
+    setTimeout(function() {
+      const aviso = document.createElement('div');
+      aviso.style.cssText = 'position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:24px;';
+      const box = document.createElement('div');
+      box.style.cssText = 'background:#1c2630;border:2px solid #ff4d6a;border-radius:12px;padding:24px 20px;max-width:340px;width:100%;text-align:center;';
+      box.innerHTML = '<div style="font-size:32px;margin-bottom:12px">⚠️</div>'
+        + '<div style="font-family:Rajdhani,sans-serif;font-size:20px;font-weight:700;color:#ff4d6a;letter-spacing:2px;margin-bottom:12px">ATENÇÃO!</div>'
+        + '<div style="font-family:Barlow,sans-serif;font-size:14px;color:#e8f0f5;line-height:1.7;margin-bottom:20px">'
+        + 'Qualquer avaria na placa <strong>imobiliza a moto.</strong><br>'
+        + 'Recomendo que dê uma <strong>reserva para o cliente.</strong>'
+        + '</div>';
+      const btn = document.createElement('button');
+      btn.textContent = 'ENTENDIDO';
+      btn.style.cssText = 'background:#ff4d6a;border:none;border-radius:6px;color:#fff;font-family:Rajdhani,sans-serif;font-size:14px;font-weight:700;letter-spacing:2px;padding:13px;cursor:pointer;width:100%;';
+      btn.addEventListener('click', function(){ aviso.remove(); });
+      aviso.addEventListener('click', function(e){ if(e.target===aviso) aviso.remove(); });
+      box.appendChild(btn);
+      aviso.appendChild(box);
+      document.body.appendChild(aviso);
+    }, 150);
+  }
   $('obs-input').value = '';
 
   // Monta grid de tipos
@@ -1080,7 +1099,11 @@ function renderResumo() {
   const danos = Object.values(state.danos);
   const ts = new Date().toLocaleString('pt-BR');
 
-  $('res-meta').textContent = `${state.placa} · ${state.inspetor} · ${ts}`;
+  const minutos = state.inicioInspecao
+    ? Math.round((new Date() - state.inicioInspecao) / 60000)
+    : null;
+  const duracaoLabel = minutos !== null ? ` · ${minutos} min` : '';
+  $('res-meta').textContent = `${state.placa} · ${state.inspetor} · ${ts}${duracaoLabel}`;
   const recEl = document.getElementById('res-reclamacao');
   if (recEl) {
     if (state.reclamacao) {
@@ -1128,11 +1151,16 @@ $('btn-enviar').addEventListener('click', async () => {
   msg.className = 'status-msg sending';
   msg.textContent = 'Enviando...';
 
+  const agora = new Date();
+  const minutos = state.inicioInspecao
+    ? Math.round((agora - state.inicioInspecao) / 60000)
+    : null;
   const payload = {
     placa: state.placa,
     inspetor: state.inspetor,
     reclamacao: state.reclamacao,
-    timestamp: new Date().toISOString(),
+    timestamp: agora.toISOString(),
+    duracao_minutos: minutos,
     danos: Object.values(state.danos)
   };
 
