@@ -253,6 +253,10 @@ input.placa-input{
   transform:translate(-50%,-50%);
   cursor:pointer;
   z-index:10;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
+  -webkit-user-select:none;
 }
 .hotspot-dot{
   width:32px;
@@ -668,8 +672,8 @@ input.placa-input{
 ══════════════════════════════════════════ -->
 <script>
 const CONFIG = {
-  GAS_URL: 'https://script.google.com/macros/s/AKfycbyov7cfU19l6MpC3K1cwM6IGfupTwefzgHnY8YwjZnQc-ke8z6Ni7oEdyAgnNkax_9t/exec',
-  INSPETORES: ["Henrique","Lucilio","CX VAMMO"],
+  GAS_URL: 'https://script.google.com/macros/s/SEU_DEPLOYMENT_ID_AQUI/exec',
+  INSPETORES: ['CX VAMMO'],
   IMAGENS: {
     frente:    'moto_front_view.png',
     traseira:  'moto_rear_view.png',
@@ -688,53 +692,11 @@ const VISTAS = [
 // ─── HOTSPOTS (x%, y% sobre a imagem) ───
 // Ajuste as coordenadas conforme necessário após ver no app
 const HOTSPOTS = {
-  frente: [
-    { id: 'hs_1', nome: 'Carenagem frontal', x: 50.6, y: 40.6 },
-    { id: 'hs_2', nome: 'Refletor dianteiro esquerdo', x: 58.5, y: 73.4 },
-    { id: 'hs_3', nome: 'Refletor dianteiro direito', x: 41.4, y: 74.6 },
-    { id: 'hs_4', nome: 'Farol', x: 57.9, y: 55.7 },
-    { id: 'hs_5', nome: 'Painel', x: 50.2, y: 19 },
-    { id: 'hs_8', nome: 'Retrovisor direito', x: 28.5, y: 8.7 },
-    { id: 'hs_9', nome: 'Retrovisor esquerdo', x: 73.4, y: 8.7 },
-    { id: 'hs_1', nome: 'Paralama dianteiro', x: 50.1, y: 64.3 },
-    { id: 'hs_2', nome: 'Manete esquerdo', x: 70.5, y: 22.7 },
-    { id: 'hs_3', nome: 'Manete direito', x: 28.6, y: 23.1 },
-    { id: 'hs_4', nome: 'Seta dianteira direita', x: 36.6, y: 30.3 },
-    { id: 'hs_5', nome: 'Seta dianteira esquerda', x: 63.5, y: 30.1 }
-  ],
-  traseira: [
-    { id: 'hs_10', nome: 'Placa', x: 49.6, y: 49.9 },
-    { id: 'hs_1', nome: 'Paralama traseiro', x: 50.4, y: 61.1 },
-    { id: 'hs_2', nome: 'Refletor traseiro', x: 50.5, y: 68.7 },
-    { id: 'hs_3', nome: 'Lanterna', x: 49.9, y: 36 },
-    { id: 'hs_4', nome: 'Seta traseiro direita', x: 64.6, y: 38.1 },
-    { id: 'hs_5', nome: 'Seta traseira esquerda', x: 34.8, y: 37.1 },
-    { id: 'hs_6', nome: 'Descanso lateral', x: 37.9, y: 93.1 },
-    { id: 'hs_7', nome: 'Suporte bagageiro', x: 49.9, y: 23.9 }
-  ],
-  lat_esq: [
-    { id: 'hs_3', nome: 'Suporte de celular', x: 50.9, y: 25.9 },
-    { id: 'hs_4', nome: 'Carenagem frontal direita', x: 57.1, y: 43.7 },
-    { id: 'hs_5', nome: 'Carenagem lateral direita', x: 36.3, y: 52.1 },
-    { id: 'hs_6', nome: 'Pedaleira direita', x: 28.9, y: 55.5 },
-    { id: 'hs_7', nome: 'Extensão lateral direita', x: 47.3, y: 70.5 },
-    { id: 'hs_8', nome: 'Carenagem posterior direita', x: 39.1, y: 64.9 },
-    { id: 'hs_9', nome: 'Banco do motorista', x: 33.7, y: 40.5 },
-    { id: 'hs_10', nome: 'Banco do passageiro', x: 22, y: 39.4 },
-    { id: 'hs_20', nome: 'Peso do guidão direito', x: 39.7, y: 26.1 }
-  ],
-  lat_dir: [
-    { id: 'hs_11', nome: 'Carenagem frontal esquerda', x: 29.4, y: 41.4 },
-    { id: 'hs_12', nome: 'Carenagem lateral esquerda', x: 56.1, y: 49.7 },
-    { id: 'hs_13', nome: 'Extensão inferior esquerda', x: 42.4, y: 70.5 },
-    { id: 'hs_14', nome: 'Carenagem posterior esquerda', x: 56.3, y: 65.8 },
-    { id: 'hs_15', nome: 'Caixa de banco', x: 64.7, y: 37.3 },
-    { id: 'hs_16', nome: 'Roda traseira', x: 84.6, y: 66.9 },
-    { id: 'hs_17', nome: 'Roda dianteira', x: 15.6, y: 67.3 },
-    { id: 'hs_18', nome: 'Peso do guidão esquerdo', x: 43.4, y: 24.9 },
-    { id: 'hs_19', nome: 'Carenagem posterior pp', x: 36.7, y: 54.4 }
-  ]
-};
+  frente:   [],
+  traseira: [],
+  lat_esq:  [],
+  lat_dir:  []
+}; /* END_HOTSPOTS */
 
 const TIPOS_DANO = [
   { id: 'riscado',  label: 'Riscado',         icon: '〜', cls: 'riscado'  },
@@ -968,20 +930,35 @@ function renderVista(vistaId) {
       ${renderDanosLista(vistaId)}
     </div>`;
 
-  // Eventos dos hotspots
+  // Eventos dos hotspots — tap em touchend para nao conflitar com scroll
   body.querySelectorAll('.hotspot').forEach(el => {
-    let tocou = false;
+    let startX = 0, startY = 0, moved = false, touched = false;
+
     el.addEventListener('touchstart', (e) => {
-      e.stopPropagation();
-      tocou = true;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      moved = false;
+    }, { passive: true });
+
+    el.addEventListener('touchmove', (e) => {
+      const dx = Math.abs(e.touches[0].clientX - startX);
+      const dy = Math.abs(e.touches[0].clientY - startY);
+      if (dx > 8 || dy > 8) moved = true;
+    }, { passive: true });
+
+    el.addEventListener('touchend', (e) => {
+      if (moved) return;
+      e.preventDefault();
+      touched = true;
       const hIdx = parseInt(el.dataset.hotspot);
       const vId = el.dataset.vista;
       const h = HOTSPOTS[vId][hIdx];
       abrirSheet(vId, hIdx, h.nome);
-      setTimeout(() => { tocou = false; }, 500);
-    }, { passive: true });
+      setTimeout(() => { touched = false; }, 600);
+    });
+
     el.addEventListener('click', (e) => {
-      if (tocou) return;
+      if (touched) return;
       e.stopPropagation();
       const hIdx = parseInt(el.dataset.hotspot);
       const vId = el.dataset.vista;
