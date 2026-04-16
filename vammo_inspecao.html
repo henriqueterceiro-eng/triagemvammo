@@ -926,20 +926,35 @@ function renderVista(vistaId) {
       ${renderDanosLista(vistaId)}
     </div>`;
 
-  // Eventos dos hotspots
+  // Eventos dos hotspots — tap em touchend para nao conflitar com scroll
   body.querySelectorAll('.hotspot').forEach(el => {
-    let tocou = false;
+    let startX = 0, startY = 0, moved = false, touched = false;
+
     el.addEventListener('touchstart', (e) => {
-      e.stopPropagation();
-      tocou = true;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      moved = false;
+    }, { passive: true });
+
+    el.addEventListener('touchmove', (e) => {
+      const dx = Math.abs(e.touches[0].clientX - startX);
+      const dy = Math.abs(e.touches[0].clientY - startY);
+      if (dx > 8 || dy > 8) moved = true;
+    }, { passive: true });
+
+    el.addEventListener('touchend', (e) => {
+      if (moved) return;
+      e.preventDefault();
+      touched = true;
       const hIdx = parseInt(el.dataset.hotspot);
       const vId = el.dataset.vista;
       const h = HOTSPOTS[vId][hIdx];
       abrirSheet(vId, hIdx, h.nome);
-      setTimeout(() => { tocou = false; }, 500);
-    }, { passive: true });
+      setTimeout(() => { touched = false; }, 600);
+    });
+
     el.addEventListener('click', (e) => {
-      if (tocou) return;
+      if (touched) return;
       e.stopPropagation();
       const hIdx = parseInt(el.dataset.hotspot);
       const vId = el.dataset.vista;
