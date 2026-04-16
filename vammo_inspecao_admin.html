@@ -1100,40 +1100,65 @@ $('cfg-gas-url').addEventListener('input', () => {
 // ─── MODAL INSPETORES ───
 function renderInspList() {
   const list = $('insp-list');
-  list.innerHTML = inspetores.map((n, i) =>
-    '<div class="insp-item">' +
-    '<span class="insp-name">' + n + '</span>' +
-    (inspetores.length > 1 ? '<button class="insp-del" data-idx="' + i + '">✕</button>' : '') +
-    '</div>'
-  ).join('');
-  list.querySelectorAll('.insp-del').forEach(btn => {
-    btn.addEventListener('click', () => {
-      inspetores.splice(parseInt(btn.dataset.idx), 1);
+  if (!list) return;
+  list.innerHTML = '';
+  inspetores.forEach(function(nome, i) {
+    const item = document.createElement('div');
+    item.className = 'insp-item';
+    const nameEl = document.createElement('span');
+    nameEl.className = 'insp-name';
+    nameEl.textContent = nome;
+    item.appendChild(nameEl);
+    const delBtn = document.createElement('button');
+    delBtn.className = 'insp-del';
+    delBtn.textContent = '✕';
+    delBtn.setAttribute('data-idx', i);
+    delBtn.addEventListener('click', function() {
+      inspetores.splice(i, 1);
       localStorage.setItem('vammo_inspetores', JSON.stringify(inspetores));
       renderInspList();
     });
+    item.appendChild(delBtn);
+    list.appendChild(item);
   });
 }
 
-$('btn-insp-modal').addEventListener('click', () => {
+function abrirModalInsp() {
   renderInspList();
-  $('overlay-insp').classList.add('open');
+  var ov = $('overlay-insp');
+  if (ov) ov.classList.add('open');
+}
+function fecharModalInsp() {
+  var ov = $('overlay-insp');
+  if (ov) ov.classList.remove('open');
+}
+
+var btnInspModal = $('btn-insp-modal');
+if (btnInspModal) btnInspModal.addEventListener('click', abrirModalInsp);
+var btnCloseInsp = $('btn-close-insp');
+if (btnCloseInsp) btnCloseInsp.addEventListener('click', fecharModalInsp);
+var btnCloseInsp2 = $('btn-close-insp2');
+if (btnCloseInsp2) btnCloseInsp2.addEventListener('click', fecharModalInsp);
+var ovInsp = $('overlay-insp');
+if (ovInsp) ovInsp.addEventListener('click', function(e) {
+  if (e.target === ovInsp) fecharModalInsp();
 });
-['btn-close-insp','btn-close-insp2'].forEach(id => {
-  $(id).addEventListener('click', () => $('overlay-insp').classList.remove('open'));
+
+var btnInspAdd = $('btn-insp-add');
+if (btnInspAdd) btnInspAdd.addEventListener('click', adicionarInspetor);
+var inspAddInput = $('insp-add-input');
+if (inspAddInput) inspAddInput.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') adicionarInspetor();
 });
-$('overlay-insp').addEventListener('click', e => {
-  if (e.target === $('overlay-insp')) $('overlay-insp').classList.remove('open');
-});
-$('btn-insp-add').addEventListener('click', adicionarInspetor);
-$('insp-add-input').addEventListener('keydown', e => { if (e.key === 'Enter') adicionarInspetor(); });
 
 function adicionarInspetor() {
-  const nome = $('insp-add-input').value.trim();
-  if (!nome || inspetores.includes(nome)) { $('insp-add-input').value = ''; return; }
+  var input = $('insp-add-input');
+  if (!input) return;
+  var nome = input.value.trim();
+  if (!nome || inspetores.indexOf(nome) !== -1) { input.value = ''; return; }
   inspetores.push(nome);
   localStorage.setItem('vammo_inspetores', JSON.stringify(inspetores));
-  $('insp-add-input').value = '';
+  input.value = '';
   renderInspList();
 }
 
