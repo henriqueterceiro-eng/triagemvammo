@@ -668,8 +668,8 @@ input.placa-input{
 ══════════════════════════════════════════ -->
 <script>
 const CONFIG = {
-  GAS_URL: 'https://script.google.com/macros/s/SEU_DEPLOYMENT_ID_AQUI/exec',
-  INSPETORES: ['CX VAMMO'],
+  GAS_URL: 'https://script.google.com/macros/s/AKfycbyov7cfU19l6MpC3K1cwM6IGfupTwefzgHnY8YwjZnQc-ke8z6Ni7oEdyAgnNkax_9t/exec',
+  INSPETORES: ["Henrique","Lucilio","CX VAMMO"],
   IMAGENS: {
     frente:    'moto_front_view.png',
     traseira:  'moto_rear_view.png',
@@ -688,11 +688,26 @@ const VISTAS = [
 // ─── HOTSPOTS (x%, y% sobre a imagem) ───
 // Ajuste as coordenadas conforme necessário após ver no app
 const HOTSPOTS = {
-  frente:   [],
-  traseira: [],
-  lat_esq:  [],
-  lat_dir:  []
-}; /* END_HOTSPOTS */
+  frente: [
+    { id: 'hs_1', nome: 'Carenagem frontal', x: 50.6, y: 40.6 },
+    { id: 'hs_1', nome: 'Paralama Dianteiro', x: 50.2, y: 63.6 },
+    { id: 'hs_2', nome: 'Refletor dianteiro esquerdo', x: 58.5, y: 73.4 },
+    { id: 'hs_3', nome: 'Refletor dianteiro direito', x: 41.4, y: 74.6 },
+    { id: 'hs_4', nome: 'Farol', x: 57.9, y: 55.7 },
+    { id: 'hs_5', nome: 'Painel', x: 50.2, y: 19 },
+    { id: 'hs_6', nome: 'Manete esquerdo', x: 71.1, y: 23 },
+    { id: 'hs_7', nome: 'Manete direito', x: 29.8, y: 23.6 },
+    { id: 'hs_8', nome: 'Retrovisor direito', x: 28.5, y: 8.7 },
+    { id: 'hs_9', nome: 'Retrovisor esquerdo', x: 73.4, y: 8.7 }
+  ],
+  traseira: [
+    { id: 'hs_10', nome: 'Placa', x: 49.6, y: 49.9 }
+  ],
+  lat_esq: [
+  ],
+  lat_dir: [
+  ]
+};
 
 const TIPOS_DANO = [
   { id: 'riscado',  label: 'Riscado',         icon: '〜', cls: 'riscado'  },
@@ -1154,12 +1169,6 @@ function renderResumo() {
        </div>`
     ).join('');
   }
-
-  // Reseta botão de envio para cada nova inspeção
-  const btnEnviar = $('btn-enviar');
-  if (btnEnviar) btnEnviar.disabled = false;
-  const statusMsg = $('status-msg');
-  if (statusMsg) { statusMsg.className = 'status-msg'; statusMsg.textContent = ''; }
 
   showScreen('screen-resumo');
 }
