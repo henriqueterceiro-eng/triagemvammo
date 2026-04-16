@@ -668,8 +668,8 @@ input.placa-input{
 ══════════════════════════════════════════ -->
 <script>
 const CONFIG = {
-  GAS_URL: 'https://script.google.com/macros/s/SEU_DEPLOYMENT_ID_AQUI/exec',
-  INSPETORES: ['CX VAMMO'],
+  GAS_URL: 'https://script.google.com/macros/s/AKfycbyov7cfU19l6MpC3K1cwM6IGfupTwefzgHnY8YwjZnQc-ke8z6Ni7oEdyAgnNkax_9t/exec',
+  INSPETORES: ["Henrique","Lucilio","CX VAMMO"],
   IMAGENS: {
     frente:    'moto_front_view.png',
     traseira:  'moto_rear_view.png',
@@ -688,11 +688,54 @@ const VISTAS = [
 // ─── HOTSPOTS (x%, y% sobre a imagem) ───
 // Ajuste as coordenadas conforme necessário após ver no app
 const HOTSPOTS = {
-  frente:   [],
-  traseira: [],
-  lat_esq:  [],
-  lat_dir:  []
-}; /* END_HOTSPOTS */
+  frente: [
+    { id: 'hs_1', nome: 'Carenagem frontal', x: 49.9, y: 40.4 },
+    { id: 'hs_2', nome: 'Paralama Dianteiro', x: 50.1, y: 65.3 },
+    { id: 'hs_3', nome: 'Refletor dianteiro Esquerdo', x: 58.4, y: 73.1 },
+    { id: 'hs_4', nome: 'Refletor dianteiro direito', x: 41.6, y: 73.3 },
+    { id: 'hs_5', nome: 'Farol', x: 56.5, y: 55.6 },
+    { id: 'hs_6', nome: 'Painel', x: 50.8, y: 19 },
+    { id: 'hs_7', nome: 'Retrovisor Esquerdo', x: 73.4, y: 8.3 },
+    { id: 'hs_8', nome: 'Manete esquerdo', x: 69.8, y: 23.3 },
+    { id: 'hs_9', nome: 'Seta dianteira esquerda', x: 63.4, y: 30.8 },
+    { id: 'hs_10', nome: 'Seta dianteira direita', x: 36.6, y: 31.3 },
+    { id: 'hs_11', nome: 'Manete direito', x: 29.4, y: 23.6 },
+    { id: 'hs_12', nome: 'Retrovisor direito', x: 27.1, y: 9.3 }
+  ],
+  traseira: [
+    { id: 'hs_13', nome: 'Placa', x: 49.9, y: 50.1 },
+    { id: 'hs_14', nome: 'Paralama Traseiro', x: 50.1, y: 61.4 },
+    { id: 'hs_15', nome: 'Refletor traseiro', x: 50.2, y: 68.6 },
+    { id: 'hs_16', nome: 'Lanterna', x: 50.1, y: 36.6 },
+    { id: 'hs_17', nome: 'Seta traseira direita', x: 62.5, y: 38.4 },
+    { id: 'hs_18', nome: 'Seta traseira esquerda', x: 35.6, y: 39 },
+    { id: 'hs_19', nome: 'Descanso lateral', x: 38.8, y: 90.9 },
+    { id: 'hs_20', nome: 'Suporte do bagageiro', x: 50.1, y: 23.7 }
+  ],
+  lat_esq: [
+    { id: 'hs_21', nome: 'Suporte de celular', x: 51, y: 25.3 },
+    { id: 'hs_22', nome: 'Carenagem frontal direita', x: 55.9, y: 42.6 },
+    { id: 'hs_23', nome: 'Carenagem lateral direita', x: 34.9, y: 51.6 },
+    { id: 'hs_24', nome: 'Pedaleira direita', x: 28.1, y: 54.9 },
+    { id: 'hs_25', nome: 'Extensão inferior direita', x: 45.7, y: 70.1 },
+    { id: 'hs_26', nome: 'Carenagem posterior direita', x: 38.4, y: 64.7 },
+    { id: 'hs_27', nome: 'Banco do motorista', x: 33.3, y: 40.7 },
+    { id: 'hs_28', nome: 'Banco do passageiro', x: 22, y: 39 },
+    { id: 'hs_30', nome: 'Peso do guidão direito', x: 39.7, y: 26.4 }
+  ],
+  lat_dir: [
+    { id: 'hs_29', nome: 'Carenagem lateral esquerda', x: 29.3, y: 41.6 },
+    { id: 'hs_31', nome: 'Peso do guidão esquerdo', x: 43, y: 24.4 },
+    { id: 'hs_32', nome: 'Carenagem posterior esquerda', x: 55, y: 65.6 },
+    { id: 'hs_33', nome: 'Extensão lateral esquerda', x: 40.6, y: 71.1 },
+    { id: 'hs_34', nome: 'Carenagem posterior pp', x: 36.1, y: 53.8 },
+    { id: 'hs_35', nome: 'Caixa de bateria', x: 58.1, y: 36.7 },
+    { id: 'hs_36', nome: 'Carenagem lateral esquerda', x: 58, y: 49.5 },
+    { id: 'hs_37', nome: 'Pedaleira esquerda', x: 63.6, y: 58.9 },
+    { id: 'hs_38', nome: 'Roda traseira', x: 84.9, y: 66.6 },
+    { id: 'hs_39', nome: 'Roda dianteira', x: 15.3, y: 68.8 }
+  ]
+};
 
 const TIPOS_DANO = [
   { id: 'riscado',  label: 'Riscado',         icon: '〜', cls: 'riscado'  },
@@ -1179,33 +1222,32 @@ $('btn-enviar').addEventListener('click', function() {
     danos: Object.values(state.danos)
   };
 
-  // Nome único por tentativa — evita conflito com callbacks anteriores
-  const cbName = 'gasCb' + Date.now();
+  // Remove callback anterior se existir
+  if (window._gasCb) { try { delete window._gasCb; } catch(e){} }
+
+  const cbName = '_gasCb';
   const script = document.createElement('script');
   let done = false;
-
-  function cleanup() {
-    try { document.head.removeChild(script); } catch(e) {}
-    try { delete window[cbName]; } catch(e) {}
-  }
 
   const timer = setTimeout(function() {
     if (done) return;
     done = true;
-    cleanup();
+    try { document.head.removeChild(script); } catch(e){}
+    delete window[cbName];
     msg.className = 'status-msg error';
     msg.textContent = '✕ Timeout — tente novamente';
     btn.disabled = false;
-  }, 90000);
+  }, 60000);
 
   window[cbName] = function(res) {
     if (done) return;
     done = true;
     clearTimeout(timer);
-    cleanup();
+    try { document.head.removeChild(script); } catch(e){}
+    delete window[cbName];
     if (res && res.ok) {
       msg.className = 'status-msg success';
-      msg.textContent = '✓ Enviado! (' + minutos + 'min ' + (seg % 60) + 's)';
+      msg.textContent = '✓ Enviado! (' + minutos + ' min)';
       state.enviado = true;
     } else {
       msg.className = 'status-msg error';
@@ -1218,9 +1260,9 @@ $('btn-enviar').addEventListener('click', function() {
     if (done) return;
     done = true;
     clearTimeout(timer);
-    cleanup();
+    delete window[cbName];
     msg.className = 'status-msg error';
-    msg.textContent = '✕ Falha de rede — verifique conexão';
+    msg.textContent = '✕ Falha de rede';
     btn.disabled = false;
   };
 
