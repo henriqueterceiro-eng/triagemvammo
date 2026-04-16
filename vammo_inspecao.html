@@ -668,8 +668,8 @@ input.placa-input{
 ══════════════════════════════════════════ -->
 <script>
 const CONFIG = {
-  GAS_URL: 'https://script.google.com/macros/s/AKfycbyov7cfU19l6MpC3K1cwM6IGfupTwefzgHnY8YwjZnQc-ke8z6Ni7oEdyAgnNkax_9t/exec',
-  INSPETORES: ["CX VAMMO"],
+  GAS_URL: 'https://script.google.com/macros/s/SEU_DEPLOYMENT_ID_AQUI/exec',
+  INSPETORES: ['CX VAMMO'],
   IMAGENS: {
     frente:    'moto_front_view.png',
     traseira:  'moto_rear_view.png',
@@ -688,20 +688,11 @@ const VISTAS = [
 // ─── HOTSPOTS (x%, y% sobre a imagem) ───
 // Ajuste as coordenadas conforme necessário após ver no app
 const HOTSPOTS = {
-  frente: [
-    { id: 'hs_1', nome: 'Carenagem Frontal', x: 49.9, y: 41.3 },
-    { id: 'hs_2', nome: 'Retrovisor Esquerdo', x: 72.8, y: 9.1 }
-  ],
-  traseira: [
-    { id: 'hs_3', nome: 'Placa', x: 50.2, y: 51.3 }
-  ],
-  lat_esq: [
-    { id: 'hs_4', nome: 'Suporte de celular', x: 50.3, y: 25.9 }
-  ],
-  lat_dir: [
-    { id: 'hs_5', nome: 'Carenagem Lateral Esquerda', x: 58.7, y: 50.8 }
-  ]
-};
+  frente:   [],
+  traseira: [],
+  lat_esq:  [],
+  lat_dir:  []
+}; /* END_HOTSPOTS */
 
 const TIPOS_DANO = [
   { id: 'riscado',  label: 'Riscado',         icon: '〜', cls: 'riscado'  },
@@ -767,7 +758,12 @@ const PLACAS_VALIDAS = new Set(["BPY9E44","BSZ0H64","BSZ8J21","BUV1H96","BVW8B24
   <div class="resumo-header">
     <div class="resumo-title">Resumo da Inspeção</div>
     <div class="resumo-meta" id="res-meta">—</div>
-    <div id="res-reclamacao" style="display:none;margin-top:8px;padding:8px 10px;background:rgba(46,194,255,.08);border:1px solid rgba(46,194,255,.2);border-radius:6px;font-family:'Barlow',sans-serif;font-size:13px;color:var(--text-dim)"><b style="color:var(--blue);font-family:'Rajdhani',sans-serif;letter-spacing:1px;font-size:11px">RECLAMAÇÃO: </b><span></span></div>
+    <div id="res-reclamacao" style="display:none;margin-top:8px;padding:8px 10px;background:rgba(46,194,255,.08);border:1px solid rgba(46,194,255,.2);border-radius:6px;font-family:'Barlow',sans-serif;font-size:13px;color:var(--text-dim)">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+        <div style="flex:1"><b style="color:var(--blue);font-family:'Rajdhani',sans-serif;letter-spacing:1px;font-size:11px">RECLAMAÇÃO: </b><span id="res-rec-texto"></span></div>
+        <button id="btn-copiar-rec" style="background:none;border:1px solid rgba(46,194,255,.3);border-radius:4px;color:var(--blue);font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:600;letter-spacing:1px;padding:3px 8px;cursor:pointer;white-space:nowrap;flex-shrink:0">Copiar</button>
+      </div>
+    </div>
   </div>
   <div class="resumo-body" id="res-body"></div>
   <div class="resumo-footer">
@@ -1108,16 +1104,26 @@ function renderResumo() {
   const danos = Object.values(state.danos);
   const ts = new Date().toLocaleString('pt-BR');
 
-  const minutos = state.inicioInspecao
-    ? Math.round((new Date() - state.inicioInspecao) / 60000)
-    : null;
-  const duracaoLabel = minutos !== null ? ` · ${minutos} min` : '';
+  const _seg = state.inicioInspecao ? Math.round((new Date() - state.inicioInspecao) / 1000) : 0;
+  const _min = Math.floor(_seg / 60);
+  const _sec = _seg % 60;
+  const duracaoLabel = state.inicioInspecao ? ` · ${_min}m${_sec}s` : '';
   $('res-meta').textContent = `${state.placa} · ${state.inspetor} · ${ts}${duracaoLabel}`;
   const recEl = document.getElementById('res-reclamacao');
   if (recEl) {
     if (state.reclamacao) {
       recEl.style.display = 'block';
-      recEl.querySelector('span').textContent = state.reclamacao;
+      const textoEl = document.getElementById('res-rec-texto');
+      if (textoEl) textoEl.textContent = state.reclamacao;
+      const btnCopiar = document.getElementById('btn-copiar-rec');
+      if (btnCopiar) {
+        btnCopiar.onclick = function() {
+          navigator.clipboard.writeText(state.reclamacao).then(function() {
+            btnCopiar.textContent = '✓ Copiado';
+            setTimeout(function() { btnCopiar.textContent = 'Copiar'; }, 2000);
+          });
+        };
+      }
     } else {
       recEl.style.display = 'none';
     }
@@ -1153,17 +1159,17 @@ function renderResumo() {
 }
 
 // ─── ENVIAR PRO SHEETS ───
-$('btn-enviar').addEventListener('click', async () => {
+$('btn-enviar').addEventListener('click', function() {
   const btn = $('btn-enviar');
   const msg = $('status-msg');
+  if (btn.disabled) return;
   btn.disabled = true;
   msg.className = 'status-msg sending';
   msg.textContent = 'Enviando...';
 
   const agora = new Date();
-  const minutos = state.inicioInspecao
-    ? Math.round((agora - state.inicioInspecao) / 60000)
-    : null;
+  const seg = state.inicioInspecao ? Math.round((agora - state.inicioInspecao) / 1000) : 0;
+  const minutos = Math.floor(seg / 60);
   const payload = {
     placa: state.placa,
     inspetor: state.inspetor,
@@ -1173,29 +1179,52 @@ $('btn-enviar').addEventListener('click', async () => {
     danos: Object.values(state.danos)
   };
 
-  try {
-    const url = CONFIG.GAS_URL + '?callback=cb';
-    await new Promise((resolve, reject) => {
-      const script = document.createElement('script');
-      window.cb = (res) => {
-        delete window.cb;
-        document.head.removeChild(script);
-        if (res && res.ok) resolve(res);
-        else reject(new Error(res?.msg || 'Erro'));
-      };
-      script.src = url + '&data=' + encodeURIComponent(JSON.stringify(payload));
-      script.onerror = () => reject(new Error('Falha de rede'));
-      document.head.appendChild(script);
-      setTimeout(() => reject(new Error('Timeout')), 15000);
-    });
-    msg.className = 'status-msg success';
-    msg.textContent = '✓ Enviado com sucesso!';
-    state.enviado = true;
-  } catch (err) {
+  // Remove callback anterior se existir
+  if (window._gasCb) { try { delete window._gasCb; } catch(e){} }
+
+  const cbName = '_gasCb';
+  const script = document.createElement('script');
+  let done = false;
+
+  const timer = setTimeout(function() {
+    if (done) return;
+    done = true;
+    try { document.head.removeChild(script); } catch(e){}
+    delete window[cbName];
     msg.className = 'status-msg error';
-    msg.textContent = '✕ Erro: ' + err.message;
+    msg.textContent = '✕ Timeout — tente novamente';
     btn.disabled = false;
-  }
+  }, 60000);
+
+  window[cbName] = function(res) {
+    if (done) return;
+    done = true;
+    clearTimeout(timer);
+    try { document.head.removeChild(script); } catch(e){}
+    delete window[cbName];
+    if (res && res.ok) {
+      msg.className = 'status-msg success';
+      msg.textContent = '✓ Enviado! (' + minutos + ' min)';
+      state.enviado = true;
+    } else {
+      msg.className = 'status-msg error';
+      msg.textContent = '✕ Erro: ' + (res ? res.msg : 'sem resposta');
+      btn.disabled = false;
+    }
+  };
+
+  script.onerror = function() {
+    if (done) return;
+    done = true;
+    clearTimeout(timer);
+    delete window[cbName];
+    msg.className = 'status-msg error';
+    msg.textContent = '✕ Falha de rede';
+    btn.disabled = false;
+  };
+
+  script.src = CONFIG.GAS_URL + '?callback=' + cbName + '&data=' + encodeURIComponent(JSON.stringify(payload));
+  document.head.appendChild(script);
 });
 
 $('btn-nova-insp').addEventListener('click', () => {
