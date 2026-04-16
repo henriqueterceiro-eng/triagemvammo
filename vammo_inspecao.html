@@ -668,8 +668,8 @@ input.placa-input{
 ══════════════════════════════════════════ -->
 <script>
 const CONFIG = {
-  GAS_URL: 'https://script.google.com/macros/s/AKfycbyov7cfU19l6MpC3K1cwM6IGfupTwefzgHnY8YwjZnQc-ke8z6Ni7oEdyAgnNkax_9t/exec',
-  INSPETORES: ["CX VAMMO","Henrique"],
+  GAS_URL: 'https://script.google.com/macros/s/SEU_DEPLOYMENT_ID_AQUI/exec',
+  INSPETORES: ['CX VAMMO'],
   IMAGENS: {
     frente:    'moto_front_view.png',
     traseira:  'moto_rear_view.png',
@@ -681,25 +681,18 @@ const CONFIG = {
 const VISTAS = [
   { id: 'frente',   label: 'Frente',   img: CONFIG.IMAGENS.frente,   square: true  },
   { id: 'traseira', label: 'Traseira', img: CONFIG.IMAGENS.traseira, square: true  },
-  { id: 'lat_esq',  label: 'Lat. Esq',img: CONFIG.IMAGENS.lat_esq,  square: false },
-  { id: 'lat_dir',  label: 'Lat. Dir', img: CONFIG.IMAGENS.lat_dir,  square: false }
+  { id: 'lat_esq',  label: 'Lat. Dir',img: CONFIG.IMAGENS.lat_esq,  square: false },
+  { id: 'lat_dir',  label: 'Lat. Esq', img: CONFIG.IMAGENS.lat_dir,  square: false }
 ];
 
 // ─── HOTSPOTS (x%, y% sobre a imagem) ───
 // Ajuste as coordenadas conforme necessário após ver no app
 const HOTSPOTS = {
-  frente: [
-    { id: 'hs_1', nome: 'Carenagem Frontal', x: 49.6, y: 42.1 },
-    { id: 'hs_2', nome: 'Retrovisor Direito', x: 27.4, y: 8.4 }
-  ],
-  traseira: [
-    { id: 'hs_3', nome: 'Placa', x: 50.6, y: 50.9 }
-  ],
-  lat_esq: [
-  ],
-  lat_dir: [
-  ]
-};
+  frente:   [],
+  traseira: [],
+  lat_esq:  [],
+  lat_dir:  []
+}; /* END_HOTSPOTS */
 
 const TIPOS_DANO = [
   { id: 'riscado',  label: 'Riscado',         icon: '〜', cls: 'riscado'  },
